@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Hello, world!</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="" />
+    <link rel="icon" href="favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <title> Odoo Looker Studio Connector | Odoo Apps Store </title>
+    <link type="image/x-icon" rel="shortcut icon"
+        href="https://apps.odoocdn.com/web/image/website/1/favicon?unique=87f1642" />
+    <link rel="preload"
+        href="https://apps.odoocdn.com/web/static/lib/fontawesome/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font"
+        crossorigin="" />
+    <link type="text/css" rel="stylesheet"
+        href="https://apps.odoo.com/web/assets/12312450-e61f5aa/1/web.assets_common.min.css"
+        data-asset-bundle="web.assets_common" data-asset-version="e61f5aa" />
+    <link type="text/css" rel="stylesheet"
+        href="https://apps.odoo.com/web/assets/12312458-ab69b11/1/web.assets_frontend.min.css"
+        data-asset-bundle="web.assets_frontend" data-asset-version="ab69b11" />
+    <script id="web.layout.odooscript" type="text/javascript">
+        var odoo = {
+            csrf_token: "a97730779ffa8d51b77453cb16bd5138e871e380o1710523500",
+            debug: "",
+        };
+    </script>
+    <script type="text/javascript">
+        odoo.__session_info__ = { "is_admin": false, "is_system": false, "is_website_user": true, "user_id": false, "is_frontend": true, "profile_session": null, "profile_collectors": null, "profile_params": null, "show_effect": "True", "translationURL": "/website/translations", "cache_hashes": { "translations": "9abe6ca5009dcf42c2231f19055828a776612cc3" }, "geoip_country_code": "IN" };
+        if (!/(^|;\s)tz=/.test(document.cookie)) {
+            const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.cookie = `tz=${userTZ}; path=/`;
+        }
+    </script>
+    <link type="text/css" rel="stylesheet" href="./style.css" />
+    <script src="https://www.recaptcha.net/recaptcha/api.js?render=6Lcul_cUAAAAAIm051Is0wb8-Tq-AiOaK_ePfzvo"></script>
+    <script>
+        if (window.grecaptcha) {
+            grecaptcha.ready(function () {
+                grecaptcha.execute('6Lcul_cUAAAAAIm051Is0wb8-Tq-AiOaK_ePfzvo', { action: 'apps_download' });
+            });
+        }
+    </script>
+    <script defer="defer" type="text/javascript"
+        src="https://apps.odoo.com/web/assets/12083783-6005cfa/1/web.assets_common_minimal.min.js"
+        data-asset-bundle="web.assets_common_minimal" data-asset-version="6005cfa"></script>
+    <script defer="defer" type="text/javascript"
+        src="https://apps.odoo.com/web/assets/12083790-435fc74/1/web.assets_frontend_minimal.min.js"
+        data-asset-bundle="web.assets_frontend_minimal" data-asset-version="435fc74"></script>
+    <script defer="defer" type="text/javascript"
+        data-src="https://apps.odoo.com/web/assets/12312463-1dfafd8/1/web.assets_common_lazy.min.js"
+        data-asset-bundle="web.assets_common_lazy" data-asset-version="1dfafd8"></script>
+    <script defer="defer" type="text/javascript"
+        data-src="https://apps.odoo.com/web/assets/12312464-582a432/1/web.assets_frontend_lazy.min.js"
+        data-asset-bundle="web.assets_frontend_lazy" data-asset-version="582a432"></script>
+    <noscript>
+        <style>
+            /* Prevent animated elements hiding */
+            .o_animate_in_children>* {
+                opacity: 1 !important;
+                -webkit-transform: scale(1) !important;
+                -ms-transform: scale(1) !important;
+                transform: scale(1) !important;
+            }
+        </style>
+    </noscript>
+</head>
+
+</head>
+
+<body style="overflow: scroll;">
+
+    <section class="s_cover o_colored_level pt0 pb0 bg-o-color-3  " data-snippet="s_cover" data-name="Cover">
+        <div class="o_we_bg_filter" style="background-color: rgb(255, 255, 255) !important;"></div>
+        <div class="s_allow_columns container-fluid">
+            <h1 style="text-align: center;">
+                <font style="font-size: 48px; font-weight: bold;">Best selling Power BI connector in market starting
+                    from 49$</font>
+            </h1>
+            <h3 class="lead" style="text-align: center;">
+                To buy the connector visit &nbsp;<b><a
+                        href="https://techneith.com/products/odoo-power-bi-direct-connector/">https://techneith.com/products/odoo-power-bi-direct-connector/</a>&nbsp;
+            </h3>
+            <p class="" style="font-size: 25px;
+            font-weight: 600;
+            padding: 10px;
+            text-align: center;">OR</p>
+            <h3 class="lead" style="text-align: center;">
+                Connect with us at &nbsp;<b>
+                    <a href="mailto:info@techneith.com">info@techneith.com</a>&nbsp;
+            </h3>
+            <!-- <h2  class="lead"  style="text-align: center;"> You may submit a free trial request on the website, if you wish to try the module before buying.</h2> -->
+            <!-- <p style="text-align: center;">
+            <a href="https://techneith.com/products/odoo_power_bi_direct_connector/" class="mb-2 btn btn-primary btn-lg" data-original-title="" title="" aria-describedby="tooltip450584">Book Demo</a>
+          </p> -->
+        </div>
+    </section>
+    <section class="oe_container pt8 mt16" style="margin-left: calc(-42vw + 50%); width: 84vw">
+        <div class="row o_equal_col_sm" style="
+                max-width: 1540px;
+                margin: 0 auto;
+                background-color: #f1e6ff;
+                padding-bottom: 62px;
+                border-radius: 15px;
+            ">
+            <div class="" style="display: block; margin: 0 auto; max-width: 330px; width: 80%">
+                <span style="width: 100%; display: inline-block">
+                    <img loading="lazy" class="img img-responsive mt24 mb24" src="./topTechneith.png"
+                        style="display: block; margin: 0 auto" />
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <section class="oe_container bg-transparent fixed-top position-relative" style="margin: -5rem 0 0">
+        <div class="o_equal_col_sm">
+            <div class="shadow bg-white pb32 pt32 px-2" style="border-radius: 15px">
+                <!-- <p
+                    class="mb8 text-center text-black-dark px-3"
+                    style="
+                        font-family: Roboto;
+                        font-weight: normal;
+                        color: #DC2727;
+                        font-size: 14px;
+                    "
+                >
+                    <u>You might have seen us before but we have moved all the sales for our bestselling Power BI Odoo Connector to our own website techneith.com</u>
+    
+    While we setup our e-commerce feel free to check out the product and send us a request if you want to buy. We will do it the old fashioned and send you an invoice against the connector :)
+                </p> -->
+                <h3 class="oe_slogan" style="
+                        color: #0f1e40;
+                        font-family: Montserrat;
+                        font-weight: 700;
+                        text-align: center;
+                        opacity: 1;
+                        font-size: 44px;
+                        margin-bottom: 18px;
+                        margin-top: 18px;
+                    ">
+                    Odoo Power BI Desktop Connector Direct
+                </h3>
+                <p class="mb16 text-center text-black-dark px-3" style="
+                        font-family: Roboto;
+                        font-weight: normal;
+                        color: #11335b;
+                        font-size: 18px;
+                    ">
+                    Connectivity tool to transfer Odoo data directly to Power BI Desktop, the module works with Odoo Sh
+                    as well
+                </p>
+                <img loading="lazy" src="./top3images2.png" alt="odoo" style="max-width: 80%; border-radius: 10px"
+                    class="my-4 center-block" />
+                <p class="mb16 text-center text-black-dark px-3" style="
+                        font-family: Roboto;
+                        font-weight: normal;
+                        color: #11335b;
+                        font-size: 14px;
+                    ">
+                    The module helps you connect your Odoo (Odoo Sh as well) to Power BI Desktop. This is direct
+                    connection of your odoo with power bi with single click refresh feature. This free module
+                    documentation only. If you want to get a lifetime access, you can buy the module from our website <a
+                        href="https://www.techneith.com/">www.techneith.com</a> It is a one-time price that you pay and
+                    enjoy the module for lifetime. If you wish to try the module before buying we will provide you a
+                    free trial.
+                </p>
+                <h3 style="
+                        color: #2e7dda;
+                        font-family: Montserrat;
+                        font-weight: 600;
+                        text-align: center;
+                        font-size: 17px;
+                        opacity: 1;
+                        margin: 8px 0 16px;
+                    " class="oe_slogan">
+                    Use Link
+                </h3>
+                <div style="
+                        font-weight: 500;
+                        font-size: 15px;
+                        width: 100%;
+                        
+                        
+                    ">
+                    <div class="text-center" style="color: #091e42; font-family: Montserrat; padding: 0; margin: 0 auto; border: 1px solid #0074ff;
+                        border-radius: 10px;">
+                        <p style="
+                                vertical-align: middle;
+                                border-radius: 9px;
+                                line-height: 50px;
+                                color: #000;
+                                font-weight: 500;
+                                padding: 5px 10px;
+                            " class="text-center mb0">
+                            <!-- https://www.techneith.com/products/odoo_power_bi_direct_connector/ -->
+                            https://youtu.be/AJw4fMPk6Rs
+                        </p>
+                    </div>
+                </div>
+                <p class="text-center my-2 text-uppercase" style="
+                        color: #091e42;
+                        font-size: 14px;
+                        font-family: Montserrat;
+                        font-weight: 500;
+                    ">
+                    or
+                </p>
+                <div class="pb32" style="margin: 0 auto; display: flex; max-width: 348px">
+                    <div class="s_panel_video" data-video-id="AJw4fMPk6Rs">
+                        <h3 style="
+                                color: #05203f;
+                                font-family: Montserrat;
+                                font-weight: 600;
+                                text-align: center;
+                                font-size: 17px;
+                                opacity: 1;
+                                margin: 8px 0 16px;
+    
+                            " class="oe_slogan">
+                            WATCH DEMO HERE
+                        </h3>
+                        <a class="s_figure_link d-inline-block p-0" href="https://youtu.be/AJw4fMPk6Rs">
+                            <img loading="lazy" src="./POWER_BI_CONNECTOR.png" style="border-radius: 10px"
+                                class="img img-fluid shadow " />
+                        </a>
+                    </div>
+                </div>
+                <p class="mb16 text-center text-black-dark px-3" style="
+                        font-family: Roboto;
+                        font-weight: normal;
+                        color: #11335b;
+                        font-size: 11px;
+                    ">
+                <ul>
+                    <li>Simply buy the module from <i
+                            class="text-primary">https://techneith.com/products/odoo-power-bi-direct-connector/</i> and
+                        then
+                        its an <b>Easy Installation</b>
+                        Check steps here <i
+                            class="text-primary">https://www.techneith.com/resources/odoo-power-bi-connector-installation-guide/</i>
+                    </li>
+                    <li>Refer to the <b>Youtube Link</b> above and see the working of the module. For more, visit
+                        <b>https://techneith.com/</b>
+                    </li>
+                    <li>What will you get ? - Odoo module and an exe file to setup on windows. You will <b>See all your
+                            Odoo data (even custom developed modules)</b> in Power BI Desktop and <b>Ability to
+                            Refresh</b> your data using the "Refresh" button manually in <b>Power BI Desktop</b></li>
+                </ul>
+                </p>
+                <h3
+                    style="text-align:center;  margin-left: 200px; margin-right: 200px; margin-top: 5px;  font-weight: 400; text-decoration:bold;">
+                    Happy Data Analytics!</h3>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="oe_container pb-5">
+        <div class="mt64 mb64">
+            <h2 style="
+                    color: #091e42;
+                    font-family: Montserrat;
+                    text-align: center;
+                    margin: 25px auto;
+                    text-transform: uppercase;
+                " class="oe_slogan">
+                <b>SALIENT FEATURES</b>
+            </h2>
+            <div class="row">
+                <div class="col-md-6 col-sm-12 mt32">
+                    <div class="container shadow d-flex px-4"
+                        style="border-radius:10px;padding:10px 0px;align-items: center;">
+                        <div class="col-md-3" style="float: left">
+                            <img loading="lazy" class="img img-responsive" src="./feature1.png" />
+                        </div>
+                        <div class="col-md-9" style="padding-left: 0; float: left; width: 70%">
+                            <h3 class="mt16 mb0" style="
+                                    font-family: Roboto;
+                                    font-weight: 500;
+                                    font-size: 19px;
+                                ">
+                                Multiple pricing options
+                            </h3>
+                            <p class="mt8" style="font-family: Roboto">
+                                This is just a documentation. If you wish to buy or try the actual module visit
+                                https://techneith.com/products/odoo-power-bi-direct-connector/
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 mt32">
+                    <div class="container shadow d-flex px-4"
+                        style="border-radius:10px;padding:10px 0px;align-items: center;">
+                        <div class="col-md-3" style="float: left">
+                            <img loading="lazy" class="img img-responsive" src="./feature2.png" />
+                        </div>
+                        <div class="col-md-9" style="padding-left: 0; float: left; width: 70%">
+                            <h3 class="mt16 mb0" style="
+                                    font-family: Roboto;
+                                    font-weight: 500;
+                                    font-size: 19px;
+                                ">
+                                See all your Odoo Data in Microsoft Power BI
+                            </h3>
+                            <p class="mt8" style="font-family: Roboto">
+                                With the help of this connectivity tool, you get to view all your Odoo data and even
+                                custom modules in Power BI
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 mt32">
+                    <div class="container shadow d-flex px-4"
+                        style="border-radius:10px;padding:10px 0px;align-items: center;">
+                        <div class="col-md-3" style="float: left">
+                            <img loading="lazy" class="img img-responsive" src="./feature3.png" />
+                        </div>
+                        <div class="col-md-9" style="padding-left: 0; float: left; width: 70%">
+                            <h3 class="mt16 mb0" style="
+                                    font-family: Roboto;
+                                    font-weight: 500;
+                                    font-size: 19px;
+                                ">
+                                Simplify the Data Exports
+                            </h3>
+                            <p class="mt8" style="font-family: Roboto">
+                                With Power BI Direct Connector, you can make the extraction process simple and save
+                                time. So, extract and export the datasets to PowerBI easily and efficiently!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 mt32">
+                    <div class="container shadow d-flex px-4"
+                        style="border-radius:10px;padding:10px 0px;align-items: center;">
+                        <div class="col-md-3" style="float: left">
+                            <img loading="lazy" class="img img-responsive" src="./feature4.png" />
+                        </div>
+                        <div class="col-md-9" style="padding-left: 0; float: left; width: 70%">
+                            <h3 class="mt16 mb0" style="
+                                    font-family: Roboto;
+                                    font-weight: 500;
+                                    font-size: 19px;
+                                ">
+                                Refresh in Just a Single Click
+                            </h3>
+                            <p class="mt8" style="font-family: Roboto">
+                                No need to update the data again and again, just a single click and you can refresh and
+                                reflect any data change.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 mt32">
+                    <div class="container shadow d-flex px-4"
+                        style="border-radius:10px;padding:10px 0px;align-items: center;">
+                        <div class="col-md-3" style="float: left">
+                            <img loading="lazy" class="img img-responsive" src="./feature5.png" />
+                        </div>
+                        <div class="col-md-9" style="padding-left: 0; float: left; width: 70%">
+                            <h3 class="mt16 mb0" style="
+                                    font-family: Roboto;
+                                    font-weight: 500;
+                                    font-size: 19px;
+                                ">
+                                Flexible Table Selection
+                            </h3>
+                            <p class="mt8" style="font-family: Roboto">
+                                It doesn't matter how little and how much you want to select the data or tables at a
+                                time, this connectivity tool makes it possible to select as much as you want flexibly!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12 mt32">
+                    <div class="container shadow d-flex px-4"
+                        style="border-radius:10px;padding:10px 0px;align-items: center;">
+                        <div class="col-md-3" style="float: left">
+                            <img loading="lazy" class="img img-responsive" src="./feature6.png" />
+                        </div>
+                        <div class="col-md-9" style="padding-left: 0; float: left; width: 70%">
+                            <h3 class="mt16 mb0" style="
+                                    font-family: Roboto;
+                                    font-weight: 500;
+                                    font-size: 19px;
+                                ">
+                                Reach New Level with Dashboard Visualization
+                            </h3>
+                            <p class="mt8" style="font-family: Roboto">
+                                Power BI builds interactive dashboards and reports that can be imported through
+                                connectivity tools.
+
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div style="height: auto; width: 100%;">
+            <div class="mb-64 my-8">
+                <h2 style="
+                    color: #091e42;
+                    font-family: Montserrat;
+                    text-align: center;
+                    margin: 25px auto;
+                    text-transform: uppercase;
+                " class="oe_slogan">
+                    <b>Time taken to process data</b>
+                </h2>
+            </div>
+            <h3
+                style="text-align:center;  margin-left: 30px; margin-right: 30px;  margin-bottom: 15px;  font-weight: 300; text-decoration:bold;">
+                Performance meausrement to show time taken to process Odoo Data in Power BI</h3>
+
+            <div class="flex d-flex justify-content-center">
+                <div style="height: auto; width: 90%;" class="mb-3">
+                    <div class="flex d-flex justify-content-center">
+                        <image src="./benchmark.jpeg" alt="odoo powerbi connector performance" style="width: 100%;" />
+                    </div>
+                </div>
+            </div>
+            <p class="mb16 text-center text-black-dark px-3" style="
+                  font-family: Roboto;
+                  font-weight: normal;
+                  color: #11335b;
+                  font-size: 15px;
+              ">
+
+            </p>
+        </div>
+    </section>
+
+    <section id="highlights" class="oe_container pt-86 mb64">
+        <div class="mt-48 pt-64">
+            <div class="mb-64 mb-64 my-8">
+                <h2 style="
+                        color: #091e42;
+                        font-family: Montserrat;
+                        text-align: center;
+                        margin: 25px auto;
+                        text-transform: uppercase;
+                    " class="oe_slogan">
+                    <b>HIGHLIGHTS</b>
+                </h2>
+            </div>
+
+            <div class="mb-64 my-4">
+                <h3 class="text-center alert" style="
+                        font-family: Roboto;
+                        font-weight: 500;
+                        color: #053519;
+                        background-color: #ebf7ff;
+                        border-radius: 10px;
+                    ">
+                    Receive Data from Odoo to PowerBI
+                </h3>
+                <div class="mt-16 mb-16">
+                    <img loading="lazy" src="./getData.gif" alt="" style="max-width: 80%; border-radius: 10px"
+                        class="img img-responsive center-block" />
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="screenshots" class="text-center mb64">
+        <a style="
+                color: #091e42;
+                font-family: Montserrat;
+                text-align: center;
+                margin: 25px auto;
+                text-transform: uppercase;
+                font-size: 40px;
+            " class="text-center" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="true"
+            aria-controls="collapseExample">
+            <b>SCREENSHOTS</b>
+            <em style="font-size: 30px; color: #875A7B; text-transform: none">+</em>
+        </a>
+        <div class="collapse show" id="collapseExample">
+            <section class="s_text_image o_colored_level pb0 pt0" data-snippet="s_image_text" data-name="Image - Text"
+                style="">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 pt16 pb16 o_colored_level" style="">
+                            <img loading="lazy" src="./ssConnectorConnection.jpg"
+                                class="img img-fluid mx-auto o_modified_image_to_save o_we_selected_image" alt=""
+                                data-original-id="794"
+                                data-original-src="/website/static/src/img/snippets_demo/s_image_text.jpg"
+                                data-mimetype="image/jpeg" data-original-title="" title=""
+                                aria-describedby="tooltip53691" data-resize-width="800" data-quality="100" />
+                        </div>
+                        <div class="col-lg-6 pt16 pb16 o_colored_level">
+                            <h2 class="o_default_snippet_text">Token Based Connection</h2>
+                            <p class="o_default_snippet_text">
+                                Techneith Connector connects Power BI and Odoo using the URL and unique Token generated
+                                by "Power BI Direct Connector" on your Odoo.
+                            </p>
+                            <p class="">
+                                Enter URL & Token generated in Odoo here and connection is setup. Just simple as that.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="s_text_image o_colored_level pt0 pb0" data-snippet="s_text_image" data-name="Text - Image"
+                style="">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 pt16 pb16 o_colored_level">
+                            <h2 class="o_default_snippet_text">
+                                Getting Data From Tables
+                            </h2>
+                            <p class="o_default_snippet_text">
+                                Get List of all tables in Odoo (even Custom Modules tables). Select the tables you want
+                                Data from and click Load to proceed.
+                            </p>
+                            <p class="o_default_snippet_text">
+                                You can apply operations on tables to get customized data. Click "Transform Data" to
+                                begin.
+                            </p>
+                        </div>
+                        <div class="col-lg-6 pt16 pb16 o_colored_level" style="">
+                            <img loading="lazy" src="./ssGetData.jpg"
+                                class="img img-fluid mx-auto o_modified_image_to_save o_we_selected_image" alt=""
+                                data-original-id="794"
+                                data-original-src="/website/static/src/img/snippets_demo/s_image_text.jpg"
+                                data-mimetype="image/jpeg" data-original-title="" title=""
+                                aria-describedby="tooltip53691" data-resize-width="800" data-quality="100" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="s_text_image o_colored_level pb0 pt0" data-snippet="s_image_text" data-name="Image - Text">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 pt16 pb16 o_colored_level">
+                            <img loading="lazy" src="./refresh.jpg"
+                                class="img img-fluid mx-auto o_modified_image_to_save o_we_selected_image" alt=""
+                                data-original-id="794"
+                                data-original-src="/website/static/src/img/snippets_demo/s_image_text.jpg"
+                                data-mimetype="image/jpeg" thereby avoiding hardwork of trying to understand
+                                relationships and make lot of joins. data-original-title="" title=""
+                                aria-describedby="tooltip53691" data-resize-width="800" data-quality="100" />
+                        </div>
+                        <div class="col-lg-6 pt16 pb16 o_colored_level">
+                            <h2 class="o_default_snippet_text">Refreshing Data</h2>
+                            <p class="o_default_snippet_text">
+                                Refreshing Data and reflecting any change is just a work of single click.
+                            </p>
+                            <p class="o_default_snippet_text">
+                                Click on Refresh in Power BI and all changes in Odoo Data will be reflected.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <!-- <section class="s_three_columns pt32 pb32 o_colored_level undefined o_half_screen_height" data-vcss="001"
+        data-snippet="s_three_columns" data-name="Columns" style="">
+        <div class="container-fluid">
+            <div class="card h-100 bg-black-15 border" style="border-width: 0px !important;">
+                <div class="card-body">
+                    <h3 class="card-title" style="text-align: center;">
+                        <font style="font-size: 40px;">
+                            <b>Our Happy Clients &amp; Their Experience With Us</b>
+                        </font>
+                    </h3>
+                </div>
+            </div>
+            <div class="row d-flex align-items-center">
+                <div class="s_col_no_bgcolor pt16 pb16 col-lg-6">
+                    <div class="card h-100 bg-black-15 border" style="border-width: 0px !important;">
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                <br>
+                            </h3>
+                            <blockquote class="s_blockquote s_blockquote_classic w-100 mx-auto o_animable blockquote"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"
+                                    data-original-title="" title="" aria-describedby="tooltip743315"></i>
+                                <div class="s_blockquote_content bg-100">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">GREAT PRODUCT! AWESOME TOOL!</b></span>
+                                    <p>We needed an API to connect ODOO with PowerBi and this was just it. It works
+                                        great and it has been really useful for our business.<br>
+                                        We would really recommend this connector and for sure we will be getting some
+                                        more products from Techneith in the near future.</p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2" alt="" loading="lazy"
+                                            data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Gustavo Michel</b> </span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote w-100 mx-auto o_animable blockquote s_blockquote_cover"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content"
+                                    style="background-position: 50% 50%; background-color: rgba(255, 0, 0, 0) !important;">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Recommended product</b></span>
+                                    <p>It was an excellent purchase. I consider it to be the best Power BI connector on
+                                        the market.
+                                        Even better has been the customer service given by Techneith, always available
+                                        to answer any questions.
+                                        <br>Recommended product
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2 d-none" alt=""
+                                            loading="lazy" data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Emilio Quiros</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote s_blockquote_classic w-100 mx-auto o_animable blockquote"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content bg-100">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Satisfied with the connector</b></span>
+                                    <p class="o_default_snippet_text"> I have used this connector for one of my custom
+                                        CRM applications and its serves the purpose. great connector to have with my
+                                        app.</p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2" alt="" loading="lazy"
+                                            data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Vikas Dhingra</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote w-100 mx-auto o_animable blockquote s_blockquote_cover"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content"
+                                    style="background-position: 50% 50%; background-color: rgba(255, 0, 0, 0) !important;">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Fantastic way to link to PowerBI</b></span>
+                                    <p>
+                                        The connector has been working as advertised and the support team was very quick
+                                        to respond and able to
+                                        provide on call resolution of any questions. I highly recommend this product!
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2 d-none" alt=""
+                                            loading="lazy" data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Guillaume, Groupe Randolph
+                                                Inc.</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote s_blockquote_classic w-100 mx-auto o_animable blockquote"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content bg-100">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Excellent feature that is providing
+                                            everything needed
+                                        </b></span>
+                                    <p class="o_default_snippet_text"> With the help of the Techneith team we configured
+                                        the module easily! The features are basically unlimited
+                                        and its a much better option than to extend the standard report tools in Odoo.
+                                        Before we used to customize
+                                        these reports by adding fields and measures but with this powerbi connector this
+                                        is something we wont do
+                                        anymore. Very nice feature and with great support.
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2" alt="" loading="lazy"
+                                            data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Sangamesh Menon, WMSSoft Pty
+                                                Ltd</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote w-100 mx-auto o_animable blockquote s_blockquote_cover"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content"
+                                    style="background-position: 50% 50%; background-color: rgba(255, 0, 0, 0) !important;">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Connector working well</b></span>
+                                    <p>
+
+                                        Thanks to Nikhil and team for getting the PowerBI connector working for our
+                                        customer. Looking forward to
+                                        seeing the dashboard now for some real results using PowerBi....
+
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2 d-none" alt=""
+                                            loading="lazy" data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Edward Mallett, Visiontrack</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+                <div class="s_col_no_bgcolor pt16 pb16 col-lg-6">
+                    <div class="card h-100 bg-black-15 border" style="border-width: 0px !important;">
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                <br>
+                            </h3>
+                            <blockquote class="s_blockquote s_blockquote_classic w-100 mx-auto o_animable blockquote"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content bg-100">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Excellent product and customer service
+                                        </b></span>
+                                    <p class="o_default_snippet_text">
+                                        This API woks perfectly. We had some issue and Techneith help us very quickly
+                                        and professionally. I
+                                        recommended definitly this product and this company.
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2" alt="" loading="lazy"
+                                            data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Andrew Law, Wildpack Beverage</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote w-100 mx-auto o_animable blockquote s_blockquote_cover"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content"
+                                    style="background-position: 50% 50%; background-color: rgba(255, 0, 0, 0) !important;">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Good app</b></span>
+                                    <p>
+                                        Seems to work well and very helpful, fast support when needed.
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2 d-none" alt=""
+                                            loading="lazy" data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Herrera Sisternes, HS&Co</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote s_blockquote_classic w-100 mx-auto o_animable blockquote"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content bg-100">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Great Support
+                                        </b></span>
+                                    <p class="o_default_snippet_text">
+                                        Their customer service is great. They can solve all your questions quickly and
+                                        simply. Thank you!
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2" alt="" loading="lazy"
+                                            data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Alexa, FSL AYNI</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote w-100 mx-auto o_animable blockquote s_blockquote_cover"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content"
+                                    style="background-position: 50% 50%; background-color: rgba(255, 0, 0, 0) !important;">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Good app</b></span>
+                                    <p>
+                                        Seems to work well and very helpful, fast support when needed.
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2 d-none" alt=""
+                                            loading="lazy" data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Herrera Sisternes, HS&Co</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote s_blockquote_classic w-100 mx-auto o_animable blockquote"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content bg-100">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Excellent Service
+                                        </b></span>
+                                    <p class="o_default_snippet_text">
+                                        Super helpful support team and the app works extremely efficiently.
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2" alt="" loading="lazy"
+                                            data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">-Xiao Yu, VIATechnik</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                            <blockquote class="s_blockquote w-100 mx-auto o_animable blockquote s_blockquote_cover"
+                                data-snippet="s_blockquote" data-name="Blockquote">
+                                <i class="s_blockquote_icon fa fa-1x fa-quote-left bg-o-color-2 rounded"></i>
+                                <div class="s_blockquote_content"
+                                    style="background-position: 50% 50%; background-color: rgba(255, 0, 0, 0) !important;">
+                                    <span class="s_blockquote_author o_default_snippet_text"><b
+                                            class="o_default_snippet_text">Great app and support</b></span>
+                                    <p>
+                                        Great app and very quick and helpful support.
+                                    </p>
+                                    <footer class="blockquote-footer">
+                                        <img loading="lazy" src="/web/image/website.s_blockquote_default_image"
+                                            class="s_blockquote_avatar img rounded-circle mr-2 d-none" alt=""
+                                            loading="lazy" data-original-id="817"
+                                            data-original-src="/website/static/src/img/snippets_demo/s_team_member_2.png"
+                                            data-mimetype="image/jpeg">
+                                        <span class="s_blockquote_author o_default_snippet_text">by - <b
+                                                class="o_default_snippet_text">Oscar Bettello, Thema USA</b></span>
+                                    </footer>
+                                </div>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section> -->
+
+    <section class="d-flex flex-column">
+        <div class="container">
+            <div class="row mt-5 d-flex flex-column align-items-center justify-content-center">
+                <div class="card h-100 bg-black-15 border" style="border-width:0px !important">
+                    <div class="card-body">
+                        <h3 class="card-title" style="text-align:center">
+                            <font style="font-size:40px">
+                                <b>Suggested Product</b>
+                            </font>
+                        </h3>
+                    </div>
+                </div>
+                <div class="position-relative" style="position: relative;
+                margin: 15px;
+                background-color: #ebf7ff;
+                box-shadow: 0px 3px 10px rgba(34, 35, 58, 0.2);
+                padding: 30px 25px 30px;
+                border-radius: 25px;
+                transition: all 0.3s;">
+                    <div class="preview-card__wrp">
+                        <div class="d-flex flex-column flex-md-row align-items-center  ">
+                            <div class="preview-card__img flex-shrink-0 shadow " style=" width: 300px;
+                            transform: translateX(-80px);
+                            
+                            height: 300px;
+                            
+                            border-radius: 20px;
+                            overflow: hidden;">
+                                <img loading="lazy" src="./odoomodel.jpg" alt="Odoo Data Model" style="width: 100%;
+                                height: 100%;
+                                object-fit: cover;
+                                display: block;
+                                opacity: 1;
+                                border-radius: 20px;
+                                transition: all 0.3s;">
+                            </div>
+                            <div class="preview-card__content d-flex flex-column align-items-center justify-content-center"
+                                style="padding-left: 20px; padding-top: 20px;">
+                                <span class="preview-card__code" style=" color: #7b7992;
+                                margin-bottom: 15px;
+                                display: block;
+                                font-weight: 500;">Entity-Relationship Diagram</span>
+                                <h3 class="preview-card__title" style="   font-size: 32px;
+                                font-weight: 700;
+                                text-decoration: underline;
+                                color: #0d0925;
+                                margin-bottom: 20px;">Odoo Data Model</h3>
+                                <p class="preview-card__text text-center" style=" color: #4e4a67;
+    
+                                line-height: 1.5em;">A module to help you see all your odoo data tables in
+                                    <span class="" style="padding: 0 20px; text-decoration: underline;">(Entity
+                                        Relationship Diagram)</span> and you can get additional features given below:
+                                <ul>
+                                    <li>List View of ALL Tables</li>
+                                    <li>Multi-level Table Relationship Diagram</li>
+                                    <li>Global Search by Column Name</li>
+                                    <li>Quick glance on Total Records for each Table</li>
+                                    <li>Custom SQL query execution</li>
+                                </ul>
+                                <div class="d-flex flex-row " style="margin:20px 0;">
+
+                                    <p class="preview-card__text" style="margin: 0; padding-left: 8px;">(28 Reviews)</p>
+                                </div>
+                                <a href="https://apps.odoo.com/apps/modules/16.0/odoo-data-model/"
+                                    class="preview-card__button" style="display: inline-flex;
+                                    background-color: #2660f2;
+                                    padding: 15px 35px;
+                                    margin-bottom: 30px;
+                                    border-radius: 50px;
+                                    color: #fff;
+                                    box-shadow: 0px 3px 10px rgba(252, 56, 56, 0.4);
+                                    text-decoration: none;
+                                    font-weight: 500;
+                                    justify-content: center;
+                                    text-align: center;
+                                    letter-spacing: 1px;">Know More</a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <!-- FAQs -->
+        <p style=" text-align: center; font-size: 32px; font-weight: 600; margin-top: 10px;"> FAQ?</p>
+        <div style="width: 100%; min-height: 300px;">
+            <div class="accordion" id="myAccordion">
+                <!-- <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                       data-target="#collapsible-51" data-parent="#myAccordion"
+                       style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Don't trust the module? </a>
+                    <div id="collapsible-51" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>We have cents of happy clients using this module. We will provide you with a free trial of module so that you can try and ensure its working before actually buying. UPDATE: Due to lots of customers showing interest in the connector, we have decided to put a limited time sale on our website.</a></a></p>
+                    </div>
+                </div> -->
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-4" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Why you are not selling on Odoo
+                        app store? </a>
+                    <div id="collapsible-4" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>We have sold our connector on odoo app store for around two years. We are the only company
+                            with direct odoo to power bi connector, to avoid copying of our product we have moved our
+                            sales to our own website techneith.com from January 1st, 2023.</p>
+                    </div>
+                </div>
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-1" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Whom to contact for
+                        customization? </a>
+                    <div id="collapsible-1" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p> You can drop a mail at <a style="color: #CD002F" href="mailto:info@techneith.com"
+                                target="_blank"></i> info@techneith.com </a></p>
+                    </div>
+                </div>
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-2" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Does it support all Odoo
+                        versions such as 12, 13, 14 and Odoo sh as well? </a>
+                    <div id="collapsible-2" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>Yes. It supports all Odoo versions such as 12, 13, 14, 15 and works on Odoo sh as well.</p>
+                    </div>
+                </div>
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-3" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Does it support both
+                        Community and Enterprise? </a>
+                    <div id="collapsible-3" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>Yes, it supports both Community and Enterpise versions.</p>
+                    </div>
+                </div>
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-31" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Do I need to buy the module
+                        again for a different version when I upgrade ? </a>
+                    <div id="collapsible-31" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>Yes, if you chose to upgrade your odoo to a different version then you wil have to buy again
+                            but feel free to get in touch with us directly during the upgrade and we might give you a
+                            discount on the same considering the fact that you have been a loyal customer already using
+                            our module.</p>
+                    </div>
+                </div>
+
+
+
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-5" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Does your connector work on
+                        Power BI Cloud? </a>
+                    <div id="collapsible-5" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>No. The connector works only on Power BI Desktop. For Cloud version, Power BI does not offer
+                            any tool to develop our custom connector thus, we cannot provide a connection with Power BI
+                            Cloud.</p>
+                    </div>
+                </div>
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-6" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Can I get a live demo of the
+                        module? </a>
+                    <div id="collapsible-6" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>We have recorded the demo in the youtube (<a style="color: #CD002F; font-weight: 500;"
+                                href="https://www.youtube.com/watch?v=AJw4fMPk6Rs" target="_blank"></i>
+                                https://www.youtube.com/watch?v=AJw4fMPk6Rs </a>) so that everyone can see the demo and
+                            buy the module directly rather than asking us. For any further enquiry or demo visit
+                            www.techneith.com or mail us at info@techneith.com. This is fully functional one month
+                            trial,
+                            this will work as a personal demo for you and if you wish to upgrade for lifetime access you
+                            can buy the module from our website <a
+                                href="https://www.techneith.com/">www.techneith.com</a>
+                        </p>
+                    </div>
+                </div>
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-7" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Can I use the connector on 1
+                        project only? </a>
+                    <div id="collapsible-7" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>Yes. The connector can be used on 1 Odoo instance only and not multiple instances. If you
+                            have multi-company setup in your Odoo, the connector will work fine and you will see the
+                            data of all companies in power bi.</p>
+                    </div>
+                </div>
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-8" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Can I publish dashboards in
+                        Power BI desktop and schedule automatic data refresh? </a>
+                    <div id="collapsible-8" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>The current connector will not allow you to schedule automatic refresh of data but it is easy
+                            to do refresh manually using the “Refresh” button on Power Bi Desktop. We have an advanced
+                            connector which can help you refresh data directly from dashboard and schedule automatic
+                            refresh as well however, please note that you might need to host your Power BI on a windows
+                            server if you want to publish reports and be available for others. This is not because of
+                            our connector but a generic requirement as you want others to access reports, thus, you have
+                            to host Power BI on a server so that it can be available all time. If you are interested in
+                            the advanced connector feel free to get in touch with us at info@techneith.com or if you are
+                            using this connector and want to upgrade to advanced version at later point that is also
+                            easily possible.</p>
+                    </div>
+                </div>
+                <div class="panel" style="border-radius: 10px; margin-top: 15px;">
+                    <a class="d-flex align-items-center" type="button" data-toggle="collapse"
+                        data-target="#collapsible-9" data-parent="#myAccordion"
+                        style="height: 50px; width: 100%; background-color: #e6e6e6; font-weight: 500; font-size: 18px;"><i
+                            class="fa fa-angle-down" aria-hidden="true"></i>&nbsp;&nbsp; Do you provide Power BI
+                        dashboard building as well? </a>
+                    <div id="collapsible-9" class="collapse" style="padding-left: 40px; padding-top: 10px">
+                        <p>Yes, our team consists of Power BI developers too so if you need help with building a
+                            dashboard we can surely do so.</p>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+
+        <!-- Support -->
+        <div style="width:100%; padding: 20px 30px; border-radius:15px; background-color: #e6e6e6; margin-top: 100px;">
+            <a style="padding: 10px 50px; font-size:19px; font-weight:600; color:rgb(255, 255, 255); text-align:center; padding-top:10px; border-radius:10px; background-color:#CD002F;  text-decoration: none; border: none; float:right;"
+                href="mailto:info@techneith.com" target="_blank">info@techneith.com</a>
+            <p style="padding: 10px 0px;font-size:24px; line-height:normal; margin-bottom:0;">For any kind of Query or
+                Support reach us at</p>
+        </div>
+
+        <!-- Similar Products -->
+
+
+    </section>
+
+    <script name="plausible" defer="defer" src="https://download.odoo.com/js/plausi_odoo.js"
+        data-domain="odoo.com"></script>
+</body>
+
+</html>
