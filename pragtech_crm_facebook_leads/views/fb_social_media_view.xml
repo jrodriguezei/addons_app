@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="action_pragtech_social_media_fb" model="ir.actions.act_window">
+            <field name="name">Pragtech Facebook Social Media</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">facebook.pragtech.social.media</field>
+            <field name="view_mode">kanban,form</field>
+        </record>
+
+        <record id="social_dashboard_facebook" model="ir.ui.menu">
+            <field name="action" ref="action_pragtech_social_media_fb"/>
+        </record>
+
+        <record id="pragtech_social_media_view_kanban_fb" model="ir.ui.view">
+            <field name="name">facebook.pragtech.facebook.media.view.kanban</field>
+            <field name="model">facebook.pragtech.social.media</field>
+            <field name="arch" type="xml">
+                <kanban create="false" class="o_kanban_pragtech_social_media">
+                    <field name="id"/>
+                    <field name="media_name"/>
+                    <field name="media_description"/>
+                    <field name="media_type"/>
+                    <field name="media_image"/>
+                    <field name="media_link_accounts"/>
+
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_color_5">
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="o_kanban_image">
+                                            <img type="open"
+                                                 t-att-src="kanban_image('facebook.pragtech.social.media', 'media_image', record.id.raw_value)"
+                                                 alt=" Facebook Social Media"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div>
+                                            <h3 class="mt4">
+                                                <t t-esc="record.media_name.value"/>
+                                            </h3>
+                                            <t t-if="record.media_description.raw_value" t-att-raw="record.media_description.raw_value"/>
+                                        </div>
+                                        <div class="mt-3">
+                                            <button t-if="record.media_link_accounts.raw_value" type="object" class="btn btn-primary float-right"
+                                                    name="pragtech_action_add_account">Link account
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+    </data>
+</odoo>
