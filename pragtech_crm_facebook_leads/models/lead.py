@@ -245,6 +245,12 @@ class CrmLead(models.Model):
     def lead_generation(self, lead, form):
         # print("\n\n\n=lead_generation====================", lead, form)
         vals = self.generate_lead_creation(lead, form)
+        ###
+        lead_exist = self.search([('fb_lead_id','=',lead['id'])],limit=1)
+        if lead_exist:
+            values_update = vals.pop('fb_lead_id')
+            lead_exist.write(values_update)
+            return lead_exist
         return self.create(vals)
 
     def fetch_opportunity_name(self, vals, lead, form):
