@@ -154,27 +154,20 @@ class CrmLead(models.Model):
 
     description = fields.Html('Notes')
     fb_lead_id = fields.Char(readonly=True)
-    fb_page_id = fields.Many2one(
-        'crm.facebook.page', related='fb_form_id.page_id',
-        store=True, readonly=True)
+    fb_page_id = fields.Many2one('crm.facebook.page', related='fb_form_id.page_id',store=True, readonly=True)
     fb_form_id = fields.Many2one('crm.facebook.form', readonly=True)
     fb_adset_id = fields.Many2one('fb.utm.adset', readonly=True)
-    fb_ad_id = fields.Many2one(
-        'utm.medium', related='medium_id', store=True, readonly=True,
-        string='Facebook Ad')
-    fb_campaign_id = fields.Many2one(
-        'utm.campaign', related='campaign_id', store=True, readonly=True,
-        string='Facebook Campaign')
+    fb_ad_id = fields.Many2one('utm.medium', related='medium_id', store=True, readonly=True, string='Facebook Ad')
+    fb_campaign_id = fields.Many2one('utm.campaign', related='campaign_id', store=True, readonly=True, string='Facebook Campaign')
     fb_date_create = fields.Datetime(readonly=True)
     fb_is_organic = fields.Boolean(readonly=True)
-
+    fb_lead_excluded = fields.Boolean(string='Lead Excluido', default=False)
     _sql_constraints = [
         ('facebook_lead_unique', 'unique(fb_lead_id)',
          'This Facebook lead already exists!')
     ]
 
     def fetch_ad(self, lead):
-        # print("\n\n\n=fetch_ad===========", self, lead)
         ad_obj = self.env['utm.medium']
         if not lead.get('ad_id'):
             return ad_obj
@@ -182,12 +175,9 @@ class CrmLead(models.Model):
                 [('fb_ad_id', '=', lead['ad_id'])]):
             return ad_obj.create({
                 'fb_ad_id': lead['ad_id'], 'name': lead['ad_name'], }).id
-
-        return ad_obj.search(
-            [('fb_ad_id', '=', lead['ad_id'])], limit=1)[0].id
+        return ad_obj.search([('fb_ad_id', '=', lead['ad_id'])], limit=1)[0].id
 
     def fetch_adset(self, lead):
-        # print("\n\n fetch_adset===================", self, lead)
         ad_obj = self.env['fb.utm.adset']
         if not lead.get('adset_id'):
             return ad_obj
@@ -195,12 +185,9 @@ class CrmLead(models.Model):
                 [('fb_adset_id', '=', lead['adset_id'])]):
             return ad_obj.create({
                 'fb_adset_id': lead['adset_id'], 'name': lead['adset_name'], }).id
-
-        return ad_obj.search(
-            [('fb_adset_id', '=', lead['adset_id'])], limit=1)[0].id
+        return ad_obj.search([('fb_adset_id', '=', lead['adset_id'])], limit=1)[0].id
 
     def fetch_campaign(self, lead):
-        # print("\n\n\nfetch_campaign=============", self, lead)
         campaign_instance = self.env['utm.campaign']
         if not lead.get('campaign_id'):
             return campaign_instance
@@ -209,15 +196,10 @@ class CrmLead(models.Model):
             return campaign_instance.create({
                 'fb_campaign_id': lead['campaign_id'],
                 'name': lead['campaign_name'], }).id
-
-        return campaign_instance.search(
-            [('fb_campaign_id', '=', lead['campaign_id'])],
-            limit=1)[0].id
+        return campaign_instance.search([('fb_campaign_id', '=', lead['campaign_id'])],limit=1)[0].id
 
     def generate_lead_creation(self, lead, form):
-        # print("\n\n generate_lead_creation==========", self, lead, form)
         vals, notes = self.fetch_fields_from_data(lead, form)
-        # print("\n\n generate_lead_creation=====================", lead)
         source_id = self.env.ref('pragtech_crm_facebook_leads.utm_source_facebook')
         medium_id = self.env.ref('pragtech_crm_facebook_leads.utm_medium_facebook')
         # coming_fb_lead_name = ''
@@ -231,8 +213,7 @@ class CrmLead(models.Model):
             'name': self.fetch_opportunity_name(vals, lead, form),
             'description': "\n".join(notes),
             'team_id': form.team_id and form.team_id.id,
-            'campaign_id': form.campaign_id and form.campaign_id.id or
-                           self.fetch_campaign(lead),
+            'campaign_id': form.campaign_id and form.campaign_id.id or self.fetch_campaign(lead),
             'source_id': source_id.id,
             'medium_id': medium_id.id,
             'user_id': form.team_id and form.team_id.user_id and form.team_id.user_id.id or False,
@@ -243,14 +224,14 @@ class CrmLead(models.Model):
         return vals
 
     def lead_generation(self, lead, form):
-        # print("\n\n\n=lead_generation====================", lead, form)
         vals = self.generate_lead_creation(lead, form)
-        ###
+        #....................add .............................#
         lead_exist = self.search([('fb_lead_id','=',lead['id'])],limit=1)
-        if lead_exist:
+        if lead_exist and not lead_exist.fb_lead_excluded:
             values_update = vals.pop('fb_lead_id')
             lead_exist.write(values_update)
             return lead_exist
+        #....................add .............................#
         return self.create(vals)
 
     def fetch_opportunity_name(self, vals, lead, form):
@@ -259,11 +240,8 @@ class CrmLead(models.Model):
         return vals['name']
 
     def fetch_fields_from_data(self, lead, form):
-        # print("\n\n\n=======fetch_fields_from_data==============", self, lead, form)
         vals, notes = {}, []
         form_mapping = form.mappings.filtered(lambda m: m.For_map_odoo_field).mapped('fb_field')
-        # print("form_mapping=================",form.mappings.filtered(lambda m: m.fb_field))
-
         unmapped_fb_fields = []
         for name, value in lead.items():
             if name not in form_mapping:

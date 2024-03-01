@@ -16,6 +16,7 @@
                         <field name="fb_ad_id"/>
                         <field name="fb_campaign_id"/>
                         <field name="fb_is_organic"/>
+                        <field name="fb_lead_excluded"/>
                     </group>
                 </page>
             </xpath>
