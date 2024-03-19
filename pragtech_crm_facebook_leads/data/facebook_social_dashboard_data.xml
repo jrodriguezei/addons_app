@@ -23,7 +23,7 @@
         <field name="name">Notificación: Lead de Facebook Creado</field>
         <field name="model_id" ref="pragtech_crm_facebook_leads.model_crm_lead"/>
         <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted) }}</field>
-        <field name="subject">{{ object.company_id.name }} Lead (Ref {{ object.name or 'n/a' }})</field>
+        <field name="subject">Nuevo Lead Odoo desde Facebook</field>
         <field name="partner_to">{{ object.company_id.partner_id.id }}</field>
         <field name="description">Envío de notificacion de Lead a la compañia</field>
         <field name="body_html" type="html">
@@ -34,10 +34,10 @@
         <br/><br/>
         Esto es un recordatorio por la recepción de un nuevo Lead desde Facebook: <span style="font-weight:bold;" t-out="object.name or ''"></span>
         <t t-if="object.email_from">
-            Correo: <span style="font-weight:bold;">(<t t-out="object.email_from "></t>)</span>
+            Correo: <span style="font-weight:bold;">(<t t-out="object.email_from"></t>)</span>
         </t>
         <t t-if="object.mobile">
-            Telefono: <span style="font-weight:bold;" t-out="format_date(object.mobile)"></span>.
+            Telefono: <span style="font-weight:bold;" t-out="object.mobile"></span>.
         </t>
 
         <t t-if="not is_html_empty(object.user_id.signature)">
