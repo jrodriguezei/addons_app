@@ -1,19 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="1">
+<odoo noupdate="0">
     <record id="facebook_social_dashboard_data_record" model="facebook.socail.dashboard">
         <field name="name">Facebook Dashboard</field>
     </record>
-     <record id="facebook_pragtech_social_media_facebook" model="facebook.pragtech.social.media">
-            <field name="media_name">Facebook</field>
-            <field name="media_type">facebook</field>
-            <field name="media_description">Manage Facebook Pages and Forms</field>
-            <field name="media_image" type="base64" file="pragtech_crm_facebook_leads/static/src/img/facebook_image.svg"/>
-        </record>
-    <record model="utm.medium" id="utm_medium_facebook">
-            <field name="name">Facebook</field>
-        </record>
 
-         <record id="utm_source_facebook" model="utm.source">
-            <field name="name">Facebook</field>
-        </record>
+    <record id="facebook_pragtech_social_media_facebook" model="facebook.pragtech.social.media">
+        <field name="media_name">Facebook</field>
+        <field name="media_type">facebook</field>
+        <field name="media_description">Manage Facebook Pages and Forms</field>
+        <field name="media_image" type="base64" file="pragtech_crm_facebook_leads/static/src/img/facebook_image.svg"/>
+    </record>
+    
+    <record model="utm.medium" id="utm_medium_facebook">
+        <field name="name">Facebook</field>
+    </record>
+
+    <record id="utm_source_facebook" model="utm.source">
+        <field name="name">Facebook</field>
+    </record>
+
+    <record id="email_template_crm_facebook_reminder" model="mail.template">
+        <field name="name">Notificación: Lead de Facebook Creado</field>
+        <field name="model_id" ref="pragtech_crm_facebook_leads.model_crm_lead"/>
+        <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted) }}</field>
+        <field name="subject">{{ object.company_id.name }} Lead (Ref {{ object.name or 'n/a' }})</field>
+        <field name="partner_to">{{ object.company_id.partner_id.id }}</field>
+        <field name="description">Envío de notificacion de Lead a la compañia</field>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Estimado <t t-out="object.company_id.partner_id.name or ''">Edificate Inteligente</t>
+
+        <br/><br/>
+        Esto es un recordatorio por la recepción de un nuevo Lead desde Facebook: <span style="font-weight:bold;" t-out="object.name or ''"></span>
+        <t t-if="object.email_from">
+            Correo: <span style="font-weight:bold;">(<t t-out="object.email_from "></t>)</span>
+        </t>
+        <t t-if="object.mobile">
+            Telefono: <span style="font-weight:bold;" t-out="format_date(object.mobile)"></span>.
+        </t>
+
+        <t t-if="not is_html_empty(object.user_id.signature)">
+            <br/><br/>
+            <t t-out="object.user_id.signature or ''">--<br/></t>
+        </t>
+    </p>
+</div></field>
+        <field name="lang">{{ object.company_id.partner_id.lang }}</field>
+        <field name="auto_delete" eval="True"/>
+    </record>
 </odoo>

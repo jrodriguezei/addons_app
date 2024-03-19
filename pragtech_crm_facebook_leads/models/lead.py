@@ -202,6 +202,7 @@ class CrmLead(models.Model):
         vals, notes = self.fetch_fields_from_data(lead, form)
         source_id = self.env.ref('pragtech_crm_facebook_leads.utm_source_facebook')
         medium_id = self.env.ref('pragtech_crm_facebook_leads.utm_medium_facebook')
+        user = self.env['res.users'].search([('name','ilike','Marketing')],limit=1)
         # coming_fb_lead_name = ''
         # if 'full_name' in lead:
         #     coming_fb_lead_name = lead['full_name']
@@ -216,7 +217,7 @@ class CrmLead(models.Model):
             'campaign_id': form.campaign_id and form.campaign_id.id or self.fetch_campaign(lead),
             'source_id': source_id.id,
             'medium_id': medium_id.id,
-            'user_id': form.team_id and form.team_id.user_id and form.team_id.user_id.id or False,
+            'user_id': form.team_id and form.team_id.user_id and form.team_id.user_id.id or user and user.id,
             'fb_adset_id': self.fetch_adset(lead),
             'fb_form_id': form.id,
             'fb_date_create': lead['created_time'].split('+')[0].replace('T', ' ')
@@ -288,9 +289,15 @@ class CrmLead(models.Model):
             return
         for lead in r['data']:
             lead = self.execute_lead_field_data(lead)
-            if not self.search(
-                    [('fb_lead_id', '=', lead.get('id')), '|', ('active', '=', True), ('active', '=', False)]):
-                self.lead_generation(lead, form)
+            if not self.search([('fb_lead_id', '=', lead.get('id')), '|', ('active', '=', True), ('active', '=', False)]):
+                new_lead = self.lead_generation(lead, form)
+                if new_lead:
+                    try:
+                        template_id = self.env.ref('pragtech_crm_facebook_leads.email_template_crm_facebook_reminder').id
+                        template = self.env['mail.template'].browse(template_id)
+                        template.send_mail(new_lead.id, force_send=True)
+                    except:
+                        pass
 
         try:
             self.env.cr.commit()
