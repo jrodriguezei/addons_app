@@ -1,0 +1,46 @@
+.sh_activity_dashboard_screen .sh_table_action_btn {border: none;background: #fff;border-radius: 5px;padding: 7px 16px;text-transform: uppercase;font-weight: 500;font-size: 11px;letter-spacing: 0.5px;color: #003e85;box-shadow: 0 2px 5px #d4d4d4;transition: all .5s;margin: 2px 0px;}
+.sh_activity_dashboard_screen .sh_table_action_btn:hover{box-shadow: 0 5px 5px #d5d5d5;}
+
+/*****************change in counter-area***********************/
+.sh_activity_dashboard_screen, .sh_activity_dashboard_screen section {padding: 20px 0px;}
+.sh_activity_dashboard_screen .counter-area .custom-card {margin-bottom: 20px;border: 0;box-shadow: 0 3px 8px 0 rgba(162, 169, 204, 0.24), 0 3px 16px 0 rgba(162, 169, 204, 0.24);}
+.sh_activity_dashboard_screen .counter-area .card {position: relative;display: flex;flex-direction: column;min-width: 0;word-wrap: break-word;background-color: #fff;background-clip: border-box;border: 1px solid #e1e6f1;border-radius: 0px;}
+.sh_activity_dashboard_screen .counter-area .sh-card-body {flex: 1 1 auto;padding: 15px 20px;}
+.sh_activity_dashboard_screen .counter-area .sh-card-body .media i {font-size: 50px;}
+.sh_activity_dashboard_screen .counter-area .sh-card-body .media .media-body {margin-top: 15px;}
+.sh_activity_dashboard_screen .counter-area .fs-20 {font-size: 20px;}
+.sh_activity_dashboard_screen .counter-area h3 {margin-bottom: 0.5rem;font-weight: 700;line-height: 1.2;margin-top: 0;}
+.sh_activity_dashboard_screen .counter-area p {font-size: 15px;font-weight: 600;}
+
+.sh_activity_dashboard_screen .counter-area .card .dash1,
+.sh_activity_dashboard_screen .counter-area .card {border-radius: 5px;}
+
+.sh_activity_dashboard_screen .counter-area .custom-card:hover {cursor: pointer;}
+.sh_activity_dashboard_screen table td,.sh_activity_dashboard_screen table th{vertical-align: middle;}
+
+.sh_activity_dashboard_screen select#sh_crm_db_supervisor_id, .sh_activity_dashboard_screen select#sh_crm_db_user_id, .sh_activity_dashboard_screen select#crm_days_filter_list{background-image: linear-gradient(45deg, transparent 50%, #fff3f3 50%), linear-gradient(135deg, white 50%, transparent 50%);background-position: calc(100% - 16px) calc(1em + 0px), calc(100% - 11px) calc(1em + 0px), calc(100% - 2.5em) 0.5em;background-size: 5px 5px, 5px 5px, 1px 1.5em;background-repeat: no-repeat;}
+
+
+/*effect*/
+.sh_activity_dashboard_screen .card {display: inline-block;transition-property: transform;transition: all .5s;}
+
+.sh_activity_dashboard_screen .card:hover {transform: scale(1.08);box-shadow: 0 5px 10px 0 rgba(162, 169, 204, 0.24), 0 5px 19px 0 rgba(162, 169, 204, 0.24);}
+.sh_activity_dashboard_screen.filter .col2 {padding: 0px 28px;}
+
+html .o_web_client>.o_action_manager {overflow-y: auto;}
+
+html .o_web_client>.o_action_manager>.o_action {overflow: auto !important;}
+
+.sh_activity_dashboard_screen .sh_pagination{overflow-x: auto;}
+.sh_activity_dashboard_screen table .badge{padding: 0.38em 0.6em;}
+@media only screen and (max-width: 992px){
+    .sh_activity_dashboard_screen table td, .sh_activity_dashboard_screen table th{white-space: nowrap;}
+    .sh_activity_dashboard_screen .sh_table{overflow: auto;}
+    .sh_activity_dashboard_screen .sh_pagination{overflow-x: unset;}
+}
+
+section.counter-area ul.pagination{
+    position:relative;
+    z-index:0;
+}
+#dashboard_header_filter #dashboard_counter .accordion .sh_activity_table .accordion-body{overflow: auto;max-height: 300px;}

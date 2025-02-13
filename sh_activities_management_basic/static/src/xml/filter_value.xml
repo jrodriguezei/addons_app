@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="activity_edition.FilterValue">
+        <div class="o-filter-value d-flex align-items-start w-100">           
+            <span class="w-100">
+                <MultiRecordSelector
+                    placeholder="Select User"
+                    resModel="mail.activity"
+                    resIds="[2]"
+                />
+            </span>                           
+        </div>
+    </t>
+</templates>

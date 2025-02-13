@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<record id="sh_res_config_settings_mail_activity_form_inherit" model="ir.ui.view">
+			<field name="name">res.config.setting.mail.activity.form</field>
+			<field name="model">res.config.settings</field>
+			<field name="inherit_id" ref="base.res_config_settings_view_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//form" position="inside">
+					<app data-string="Activity Management" string="Activity Management" name="sh_activities_management_basic">
+						<block title="Multi Users in Activity Configuration" name="multi_user_in_activity_setting_container">
+							<setting id="sh_display_multi_user">
+								<field name="sh_display_multi_user"/>
+							</setting>            
+						</block>
+						<block title="Dashboard Configuration" name="dashboard_heading">
+							<setting id="sh_planned_table">
+								<field name="sh_planned_table"/>
+							</setting>
+							<setting id="sh_all_table">
+								<field name="sh_all_table"/>
+							</setting>            
+							<setting id="sh_completed_table">
+								<field name="sh_completed_table" />
+							</setting>
+							<setting id="sh_due_table">
+								<field name="sh_due_table"/>
+							</setting>   
+						</block>
+						<block title="Display Dashboard Counter and Data Table Configuration" name="dashboard_counter_data_table_configuration">
+							<setting >
+								<h2>Counter</h2>
+							</setting>
+							<setting  >
+								<h2>Data Table</h2>
+							</setting>
+							
+						</block>
+						<block>
+							<setting id="dashboard_tile_display_div" >
+								<field name="sh_display_all_activities_counter"/>
+							</setting>
+							<setting id="sh_display_all_activities_table" >
+								<field name="sh_display_all_activities_table"/>
+							</setting>
+						</block>
+						<block >
+							<setting >
+								<field name="sh_display_planned_activities_counter"/>
+							</setting>
+							<setting >
+								<field name="sh_display_planned_activities_table"/>
+							</setting>
+							
+						</block>
+						<block >
+							<setting >
+								<field name="sh_display_completed_activities_counter"/>
+							</setting>
+							<setting >
+								<field name="sh_display_completed_activities_table"/>
+							</setting>
+							
+						</block>
+						<block >
+							<setting >
+								<field name="sh_display_overdue_activities_counter"/>
+							</setting>
+							<setting >
+								<field name="sh_display_overdue_activities_table"/>
+							</setting>
+							
+						</block>
+						<block >
+							<setting >
+								<field name="sh_display_cancelled_activities_counter"/>
+							</setting>
+							<setting >
+								<field name="sh_display_cancelled_activities_table"/>
+							</setting>
+							
+						</block>
+					</app>              
+				</xpath>
+			</field>
+		</record>
+
+    <record id="activity_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'sh_activities_management_basic', 'bin_size': False}</field>
+    </record>
+	<menuitem id="menu_config_activity" name="Settings" parent="sh_activities_management_basic.menu_config" sequence="3" action="activity_config_settings_action" groups="base.group_system,sh_activities_management_basic.group_activity_manager" />
+	</data>
+</odoo>
