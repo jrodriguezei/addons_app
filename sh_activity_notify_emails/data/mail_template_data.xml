@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Template and notification section -->
+    <record id="send_activity_notification_assignee" model="mail.template">
+        <field name="name">Send Activity Notification To Assignee</field>
+        <field name="model_id" ref="mail.model_mail_activity" />
+        <field name="partner_to">{{object.user_id.partner_id.id}}</field>
+        <field name="subject">Assigned activity # {{object.activity_type_id.name}} of document {{object.res_name}} </field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                    Dear <b><t t-out="object.user_id.partner_id.name or ''" /></b>,
+                    <br />
+                    <br />
+                    <t t-if="ctx.get('done_activity')">
+                        Activity # <t t-out="object.activity_type_id.name or ''" /> of document <t t-out="object.res_name or ''" /> has been done by <t t-out="ctx['user'] or ''" /> .
+                        <br />
+                        <br />
+                        <strong> Feedback: </strong><t t-out="object.get_feedback() or ''" />
+                    </t>
+                    <t t-if="ctx.get('edit_activity')">
+                        Activity # <t t-out="object.activity_type_id.name or ''" /> of document <t t-out="object.res_name or ''" /> has been modified by <t t-out="ctx['user'] or ''" />.
+                        <br />
+                        <br />
+                        <strong> Summary: </strong><t t-out="object.summary or ''" />
+                        <br />
+                        <strong> Description: </strong><t t-out="object.get_note() or ''" />
+                        <br />
+                        <strong> Due Date: </strong><t t-out="object.date_deadline or ''" />
+                    </t>
+                    <t t-if="ctx.get('unlink_activity')">
+                        Activity # <t t-out="object.activity_type_id.name or ''" /> of document <t t-out="object.res_name or ''" /> has been cancelled by <t t-out="ctx['user'] or ''" />.
+                        <br />
+                        <br />
+                    </t>
+                </p>
+                <div style="display: inline-block; margin: 15px 0px; text-align: center;">
+                    <a
+                        t-att-href="'/mail/view?model=%s&amp;res_id=%s' % (object.res_model, object.res_id)"
+                        target="_blank"
+                        style="padding: 5px 10px; color: #ffffff; text-decoration: none; background-color: #875a7b; border: 1px solid #875a7b; border-radius: 3px;"
+                    >
+                        View
+                    </a>
+                </div>
+            </div>
+        </field>
+        <field name="lang">{{object.user_id.partner_id.lang}}</field>
+        <field name="auto_delete" eval="True" />
+    </record>
+
+    <record id="send_activity_notification_create_user" model="mail.template">
+        <field name="name">Send Activity Notification To Create User</field>
+        <field name="model_id" ref="mail.model_mail_activity" />
+        <field name="partner_to">{{object.create_uid.partner_id.id}}</field>
+        <field name="subject">Assigned activity # {{object.activity_type_id.name}} of document {{object.res_name}} </field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                    Dear <b><t t-out="object.user_id.partner_id.name or ''" /></b>,
+                    <br />
+                    <br />
+                    <t t-if="ctx.get('done_activity')">
+                        Activity # <t t-out="object.activity_type_id.name or ''" /> of document <t t-out="object.res_name or ''" /> has been done by <t t-out="ctx['user'] or ''" /> .
+                        <br />
+                        <br />
+                        <strong> Feedback: </strong><t t-out="object.get_feedback() or ''" />
+                    </t>
+                    <t t-if="ctx.get('edit_activity')">
+                        Activity # <t t-out="object.activity_type_id.name or ''" /> of document <t t-out="object.res_name or ''" /> has been modified by <t t-out="ctx['user'] or ''" />.
+                        <br />
+                        <br />
+                        <strong> Summary: </strong><t t-out="object.summary or ''" />
+                        <br />
+                        <strong> Description: </strong><t t-out="object.get_note() or ''" />
+                        <br />
+                        <strong> Due Date: </strong><t t-out="object.date_deadline or ''" />
+                    </t>
+                    <t t-if="ctx.get('unlink_activity')">
+                        Activity # <t t-out="object.activity_type_id.name or ''" /> of document <t t-out="object.res_name or ''" /> has been cancelled by <t t-out="ctx['user'] or ''" />.
+                        <br />
+                        <br />
+                    </t>
+                </p>
+                <div style="display: inline-block; margin: 15px; text-align: center;">
+                    <a
+                        t-att-href="'/mail/view?model=%s&amp;res_id=%s' % (object.res_model, object.res_id)"
+                        target="_blank"
+                        style="padding: 5px 10px; color: #ffffff; text-decoration: none; background-color: #875a7b; border: 1px solid #875a7b; border-radius: 3px;"
+                    >
+                        View
+                    </a>
+                </div>
+            </div>
+        </field>       
+        <field name="lang">{{object.create_uid.partner_id.lang}}</field>
+        <field name="auto_delete" eval="True" />
+    </record>
+    
+</odoo>

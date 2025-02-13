@@ -1,0 +1,81 @@
+<?xml version ="1.0" encoding="utf-8" ?>
+
+<odoo>
+    <record id="sh_res_config_settings_mail_activity_email_form_inherit" model="ir.ui.view">
+        <field name="name">res.config.setting.mail.activity.email.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="crm.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='crm']" position="inside">                
+                <block title="Activity Email Notification">
+                    <setting>                        
+                        <field name="activity_email_notification" />                    
+                            <div class="text-muted">
+                                Set Options to True and configure when to send email and to whom you want to send email notification.
+                            </div>                                                                                           
+                    </setting>                    
+                </block>
+                <block >     
+                    <setting invisible="activity_email_notification == False">                           
+                        <field name="edit_notification" />                                                   
+                        <div class="text-muted">
+                            Send Email on modify activity
+                        </div>                                               
+                    </setting>          
+                    <setting invisible="edit_notification == False"> 
+                        <div class="content-group">
+                            <div class="row">                                  
+                                <div class="col-6">                                   
+                                    <field name="notify_create_user_edit" />
+                                    <label for="notify_create_user_edit"/> 
+                                </div>   
+                                <div class="col-6">                                                        
+                                    <field name="notify_assignee_user_edit" />
+                                    <label for="notify_assignee_user_edit"/>   
+                                </div>                                               
+                            </div>                            
+                        </div>                               
+                    </setting>                         
+                </block>  
+                <block>
+                    <setting invisible="activity_email_notification == False">
+                        <field name="done_notification" />                          
+                    </setting>
+                    <setting  invisible="done_notification == False">
+                        <div class="content-group">
+                            <div class="row">    
+                                <div class="col-6">  
+                                    <field name="notify_create_user_done" />
+                                    <label for="notify_create_user_done"/> 
+                                </div>
+                                <div class="col-6">  
+                                    <field name="notify_assignee_user_done" />
+                                    <label for="notify_assignee_user_done"/> 
+                                </div>
+                            </div>
+                        </div>         
+                    </setting>                                              
+                </block> 
+                <block>                   
+                    <setting  invisible="activity_email_notification == False">
+                        <field name="cancel_notification" />
+                    </setting>
+                    <setting  invisible="cancel_notification == False">
+                        <div class="content-group">
+                            <div class="row">    
+                                <div class="col-6">  
+                                    <field name="notify_create_user_cancel" />
+                                    <label for="notify_create_user_cancel"/> 
+                                </div>
+                                <div class="col-6">  
+                                    <field name="notify_assignee_user_cancel" />
+                                    <label for="notify_assignee_user_cancel"/> 
+                                </div>
+                            </div>
+                        </div>                                
+                    </setting>                   
+                </block>                                          
+            </xpath>
+        </field>
+    </record>
+</odoo>
