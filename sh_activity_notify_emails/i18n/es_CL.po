@@ -1,0 +1,209 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* sh_activity_notify_emails
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-03-04 14:27+0000\n"
+"PO-Revision-Date: 2025-03-04 14:27+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__notify_assignee_user_edit
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__notify_assignee_user_edit
+msgid " Notify Assignee User"
+msgstr " Notificar al Usuario Asignado"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__notify_assignee_user_cancel
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__notify_assignee_user_cancel
+msgid " Notify Assignee User "
+msgstr " Notificar al Usuario Asignado "
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__notify_create_user_edit
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__notify_create_user_edit
+msgid " Notify Create User"
+msgstr " Notificar al Usuario Creador"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__notify_create_user_cancel
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__notify_create_user_cancel
+msgid " Notify Create User "
+msgstr " Notificar al Usuario Creador "
+
+#. module: sh_activity_notify_emails
+#: model:mail.template,body_html:sh_activity_notify_emails.send_activity_notification_assignee
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    Dear <b><t t-out=\"object.user_id.partner_id.name or ''\"></t></b>,\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    <t t-if=\"ctx.get('done_activity')\">\n"
+"                        Activity # <t t-out=\"object.activity_type_id.name or ''\"></t> of document <t t-out=\"object.res_name or ''\"></t> has been done by <t t-out=\"ctx['user'] or ''\"></t> .\n"
+"                        <br>\n"
+"                        <br>\n"
+"                        <strong> Feedback: </strong><t t-out=\"object.get_feedback() or ''\"></t>\n"
+"                    </t>\n"
+"                    <t t-if=\"ctx.get('edit_activity')\">\n"
+"                        Activity # <t t-out=\"object.activity_type_id.name or ''\"></t> of document <t t-out=\"object.res_name or ''\"></t> has been modified by <t t-out=\"ctx['user'] or ''\"></t>.\n"
+"                        <br>\n"
+"                        <br>\n"
+"                        <strong> Summary: </strong><t t-out=\"object.summary or ''\"></t>\n"
+"                        <br>\n"
+"                        <strong> Description: </strong><t t-out=\"object.get_note() or ''\"></t>\n"
+"                        <br>\n"
+"                        <strong> Due Date: </strong><t t-out=\"object.date_deadline or ''\"></t>\n"
+"                    </t>\n"
+"                    <t t-if=\"ctx.get('unlink_activity')\">\n"
+"                        Activity # <t t-out=\"object.activity_type_id.name or ''\"></t> of document <t t-out=\"object.res_name or ''\"></t> has been cancelled by <t t-out=\"ctx['user'] or ''\"></t>.\n"
+"                        <br>\n"
+"                        <br>\n"
+"                    </t>\n"
+"                </p>\n"
+"                <div style=\"display: inline-block; margin: 15px 0px; text-align: center;\">\n"
+"                    <a t-att-href=\"'/mail/view?model=%s&amp;res_id=%s' % (object.res_model, object.res_id)\" target=\"_blank\" style=\"padding: 5px 10px; color: #ffffff; text-decoration: none; background-color: #875a7b; border: 1px solid #875a7b; border-radius: 3px;\">\n"
+"                        View\n"
+"                    </a>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
+msgstr ""
+
+#. module: sh_activity_notify_emails
+#: model:mail.template,body_html:sh_activity_notify_emails.send_activity_notification_create_user
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    Estimado(a) <b><t t-out=\"object.user_id.partner_id.name or ''\"></t></b>,\n"
+"                    <br>\n"
+"                    <br>\n"
+"                    <t t-if=\"ctx.get('done_activity')\">\n"
+"                        Actividad # <t t-out=\"object.activity_type_id.name or ''\"></t> del documento <t t-out=\"object.res_name or ''\"></t> ha sido realizada por <t t-out=\"ctx['user'] or ''\"></t> .\n"
+"                        <br>\n"
+"                        <br>\n"
+"                        <strong> Feedback: </strong><t t-out=\"object.get_feedback() or ''\"></t>\n"
+"                    </t>\n"
+"                    <t t-if=\"ctx.get('edit_activity')\">\n"
+"                        Actividad # <t t-out=\"object.activity_type_id.name or ''\"></t> del documento <t t-out=\"object.res_name or ''\"></t> ha sido modificada por <t t-out=\"ctx['user'] or ''\"></t>.\n"
+"                        <br>\n"
+"                        <br>\n"
+"                        <strong> Resumen: </strong><t t-out=\"object.summary or ''\"></t>\n"
+"                        <br>\n"
+"                        <strong> Descripción: </strong><t t-out=\"object.get_note() or ''\"></t>\n"
+"                        <br>\n"
+"                        <strong> Vencimiento: </strong><t t-out=\"object.date_deadline or ''\"></t>\n"
+"                    </t>\n"
+"                    <t t-if=\"ctx.get('unlink_activity')\">\n"
+"                        Actividad # <t t-out=\"object.activity_type_id.name or ''\"></t> del documento <t t-out=\"object.res_name or ''\"></t> ha sido cancelada por <t t-out=\"ctx['user'] or ''\"></t>.\n"
+"                        <br>\n"
+"                        <br>\n"
+"                    </t>\n"
+"                </p>\n"
+"                <div style=\"display: inline-block; margin: 15px; text-align: center;\">\n"
+"                    <a t-att-href=\"'/mail/view?model=%s&amp;res_id=%s' % (object.res_model, object.res_id)\" target=\"_blank\" style=\"padding: 5px 10px; color: #ffffff; text-decoration: none; background-color: #875a7b; border: 1px solid #875a7b; border-radius: 3px;\">\n"
+"                        View\n"
+"                    </a>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
+msgstr ""
+
+#. module: sh_activity_notify_emails
+#: model:ir.model,name:sh_activity_notify_emails.model_mail_activity
+msgid "Activity"
+msgstr "Actividad"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__activity_email_notification
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__activity_email_notification
+#: model_terms:ir.ui.view,arch_db:sh_activity_notify_emails.sh_res_config_settings_mail_activity_email_form_inherit
+msgid "Activity Email Notification"
+msgstr "Notificación de Email de Actividad"
+
+#. module: sh_activity_notify_emails
+#: model:mail.template,subject:sh_activity_notify_emails.send_activity_notification_assignee
+#: model:mail.template,subject:sh_activity_notify_emails.send_activity_notification_create_user
+msgid ""
+"Assigned activity # {{object.activity_type_id.name}} of document "
+"{{object.res_name}} "
+msgstr ""
+"Actividad asignada # {{object.activity_type_id.name}} del documento "
+"{{object.res_name}} "
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__cancel_notification
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__cancel_notification
+msgid "Cancel Notification"
+msgstr "Notificación de Cancelación"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model,name:sh_activity_notify_emails.model_res_company
+msgid "Company Base Chile"
+msgstr "Empresa Base Chile"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model,name:sh_activity_notify_emails.model_res_config_settings
+msgid "Config Settings"
+msgstr "Ajustes de Configuración"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__done_notification
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__done_notification
+msgid "Done Notification"
+msgstr "Notificación de Hecho"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__edit_notification
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__edit_notification
+msgid "Edit Notification"
+msgstr "Notificación de Edición"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_mail_activity__feedback
+msgid "Feedback"
+msgstr "Comentarios"
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__notify_assignee_user_done
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__notify_assignee_user_done
+msgid "Notify Assignee User "
+msgstr "Notificar al Usuario Asignado "
+
+#. module: sh_activity_notify_emails
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_company__notify_create_user_done
+#: model:ir.model.fields,field_description:sh_activity_notify_emails.field_res_config_settings__notify_create_user_done
+msgid "Notify Create User "
+msgstr "Notificar al Usuario Creador "
+
+#. module: sh_activity_notify_emails
+#: model:mail.template,name:sh_activity_notify_emails.send_activity_notification_assignee
+msgid "Send Activity Notification To Assignee"
+msgstr "Enviar Notificación de Actividad al Asignado"
+
+#. module: sh_activity_notify_emails
+#: model:mail.template,name:sh_activity_notify_emails.send_activity_notification_create_user
+msgid "Send Activity Notification To Create User"
+msgstr "Enviar Notificación de Actividad al Usuario Creador"
+
+#. module: sh_activity_notify_emails
+#: model_terms:ir.ui.view,arch_db:sh_activity_notify_emails.sh_res_config_settings_mail_activity_email_form_inherit
+msgid "Send Email on modify activity"
+msgstr "Enviar Email al modificar actividad"
+
+#. module: sh_activity_notify_emails
+#: model_terms:ir.ui.view,arch_db:sh_activity_notify_emails.sh_res_config_settings_mail_activity_email_form_inherit
+msgid ""
+"Set Options to True and configure when to send email and to whom you want to"
+" send email notification."
+msgstr ""
+"Establezca las opciones en Verdadero y configure cuándo enviar el correo electrónico y a quién desea "
+"enviar la notificación por correo electrónico."
