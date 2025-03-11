@@ -69,7 +69,7 @@ class MailActivity(models.Model):
     sh_activity_tags = fields.Many2many(
         "sh.activity.tags", string='Activity Tags')
     state = fields.Selection(
-        selection_add=[("done", "Done"), ("cancel", "Cancelled")],
+        selection_add=[("cancel", "Cancelled")],
         compute="_compute_state",
         search='_search_state'
     )
@@ -163,14 +163,14 @@ class MailActivity(models.Model):
                 elif record.activity_done:
                     record.state = 'done'
                 else:
-                    record.state = 'pending'  # Asignar un valor por defecto
+                    record.state = 'planned'  # Asignar un valor por defecto
                 
                 _logger.info(record.state)
                 _logger.info('================2=================')
             
             # Si el registro está activo
             else:
-                record.sh_state = record.state or 'pending'  # Evitar valores vacíos
+                record.sh_state = record.state or 'planned'  # Evitar valores vacíos
 
 
     @api.model_create_multi
