@@ -132,6 +132,8 @@ class MailActivity(models.Model):
     def _compute_state(self):
         super(MailActivity, self)._compute_state()
         for record in self.filtered(lambda activity: not activity.active):
+            _logger.info('=================1================')
+            _logger.info(record.state)
             if record.activity_cancel:
                 record.state = 'cancel'
             if record.activity_done:
@@ -140,7 +142,8 @@ class MailActivity(models.Model):
                 tz = record.user_id.sudo().tz
                 date_deadline = record.date_deadline
                 record.state = self._compute_state_from_date(date_deadline, tz)
-
+            _logger.info(record.state)
+            _logger.info('================2=================')
         for activity_record in self.filtered(lambda activity: activity.active):
             activity_record.sh_state = activity_record.state
 
