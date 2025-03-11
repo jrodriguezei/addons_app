@@ -70,7 +70,7 @@ class MailActivity(models.Model):
         "sh.activity.tags", string='Activity Tags')
     state = fields.Selection(
         selection_add=[("done", "Done"), ("cancel", "Cancelled")],
-        #compute="_compute_state",
+        compute="_compute_state",
         search='_search_state'
     )
     sh_state = fields.Selection([('overdue', 'Overdue'), ('today', 'Today'), (
@@ -144,6 +144,34 @@ class MailActivity(models.Model):
             
         # ~ for activity_record in self.filtered(lambda activity: activity.active):
             # ~ activity_record.sh_state = activity_record.state
+
+
+    @api.depends('active', 'date_deadline')
+    def _compute_state(self):
+        """Hereda y extiende el cálculo del estado de la actividad."""
+        
+        super()._compute_state()
+
+        for record in self:
+            if not record.active:
+                _logger.info('=================1================')
+                _logger.info(record.state)
+
+                # Asegurar que `state` siempre tenga un valor
+                if record.activity_cancel:
+                    record.state = 'cancel'
+                elif record.activity_done:
+                    record.state = 'done'
+                else:
+                    record.state = 'pending'  # Asignar un valor por defecto
+                
+                _logger.info(record.state)
+                _logger.info('================2=================')
+            
+            # Si el registro está activo
+            else:
+                record.sh_state = record.state or 'pending'  # Evitar valores vacíos
+
 
     @api.model_create_multi
     def create(self, vals_list):
