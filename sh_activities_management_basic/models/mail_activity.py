@@ -132,11 +132,6 @@ class MailActivity(models.Model):
     # ~ def _compute_state(self):
         # ~ super(MailActivity, self)._compute_state()
 
-        # ~ for record in self.filtered(lambda activity: activity.date_deadline):
-            # ~ tz = record.user_id.sudo().tz
-            # ~ date_deadline = record.date_deadline
-            # ~ record.state = 'done' if not record.active else self._compute_state_from_date(date_deadline, tz)
-
         # ~ for record in self.filtered(lambda activity: not activity.active):
             # ~ _logger.info('=================1================')
             # ~ _logger.info(record.state)
@@ -419,14 +414,13 @@ class MailActivity(models.Model):
     
     def activity_format(self):
         self = self.filtered(lambda r: r.active == True)
-        if self.exists():
-            activities = self.read()
-            mail_template_ids = set([template_id for activity in activities for template_id in activity["mail_template_ids"]])
-            mail_template_info = self.env["mail.template"].browse(mail_template_ids).read(['id', 'name'])
-            mail_template_dict = dict([(mail_template['id'], mail_template) for mail_template in mail_template_info])
-            for activity in activities:
-                activity['mail_template_ids'] = [mail_template_dict[mail_template_id] for mail_template_id in activity['mail_template_ids']]
-            return activities
+        activities = self.read()
+        mail_template_ids = set([template_id for activity in activities for template_id in activity["mail_template_ids"]])
+        mail_template_info = self.env["mail.template"].browse(mail_template_ids).read(['id', 'name'])
+        mail_template_dict = dict([(mail_template['id'], mail_template) for mail_template in mail_template_info])
+        for activity in activities:
+            activity['mail_template_ids'] = [mail_template_dict[mail_template_id] for mail_template_id in activity['mail_template_ids']]
+        return activities
 
     
 # class ResUsers(models.Model):
