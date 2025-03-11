@@ -136,6 +136,11 @@ class MailActivity(models.Model):
                 record.state = 'cancel'
             if record.activity_done:
                 record.state = 'done'
+            else:
+                tz = record.user_id.sudo().tz
+                date_deadline = record.date_deadline
+                record.state = self._compute_state_from_date(date_deadline, tz)
+
         for activity_record in self.filtered(lambda activity: activity.active):
             activity_record.sh_state = activity_record.state
 
