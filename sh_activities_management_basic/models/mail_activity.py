@@ -153,6 +153,8 @@ class MailActivity(models.Model):
         super()._compute_state()
 
         for record in self:
+            tz = record.user_id.sudo().tz
+            date_deadline = record.date_deadline
             if not record.active:
                 _logger.info('=================1================')
                 _logger.info(record.state)
@@ -163,14 +165,14 @@ class MailActivity(models.Model):
                 elif record.activity_done:
                     record.state = 'done'
                 else:
-                    record.state = 'planned'  # Asignar un valor por defecto
+                    record.state = self._compute_state_from_date(date_deadline, tz)
                 
                 _logger.info(record.state)
                 _logger.info('================2=================')
             
             # Si el registro está activo
             else:
-                record.sh_state = record.state or 'planned'  # Evitar valores vacíos
+                record.sh_state = record.state or self._compute_state_from_date(date_deadline, tz)
 
 
     @api.model_create_multi
