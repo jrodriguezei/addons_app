@@ -166,10 +166,12 @@ class MailActivity(models.Model):
                 res.sh_user_ids = [(6,0,[])]
             _logger.info('-------------------')
             _logger.info(res)
-            _logger.info(res.state)
             _logger.info('-------------------')
-            if res.state:
-                res.sh_state = res.state
+            try:
+                if res.state:
+                    res.sh_state = res.state
+            except Exception:
+                _logger.exception('No asignado state')
         return res_values
 
     def write(self, vals):
