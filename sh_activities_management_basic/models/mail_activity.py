@@ -70,7 +70,7 @@ class MailActivity(models.Model):
         "sh.activity.tags", string='Activity Tags')
     state = fields.Selection(
         selection_add=[("done", "Done"), ("cancel", "Cancelled")],
-        compute="_compute_state",
+        #compute="_compute_state",
         search='_search_state'
     )
     sh_state = fields.Selection([('overdue', 'Overdue'), ('today', 'Today'), (
@@ -128,27 +128,27 @@ class MailActivity(models.Model):
         self.activity_cancel = False
         self._compute_state()
 
-    @api.depends('active', 'date_deadline')
-    def _compute_state(self):
-        super(MailActivity, self)._compute_state()
+    # ~ @api.depends('active', 'date_deadline')
+    # ~ def _compute_state(self):
+        # ~ super(MailActivity, self)._compute_state()
 
-        for record in self.filtered(lambda activity: activity.date_deadline):
-            tz = record.user_id.sudo().tz
-            date_deadline = record.date_deadline
-            record.state = 'done' if not record.active else self._compute_state_from_date(date_deadline, tz)
+        # ~ for record in self.filtered(lambda activity: activity.date_deadline):
+            # ~ tz = record.user_id.sudo().tz
+            # ~ date_deadline = record.date_deadline
+            # ~ record.state = 'done' if not record.active else self._compute_state_from_date(date_deadline, tz)
 
-        for record in self.filtered(lambda activity: not activity.active):
-            _logger.info('=================1================')
-            _logger.info(record.state)
-            if record.activity_cancel:
-                record.state = 'cancel'
-            if record.activity_done:
-                record.state = 'done'
-            _logger.info(record.state)
-            _logger.info('================2=================')
+        # ~ for record in self.filtered(lambda activity: not activity.active):
+            # ~ _logger.info('=================1================')
+            # ~ _logger.info(record.state)
+            # ~ if record.activity_cancel:
+                # ~ record.state = 'cancel'
+            # ~ if record.activity_done:
+                # ~ record.state = 'done'
+            # ~ _logger.info(record.state)
+            # ~ _logger.info('================2=================')
             
-        for activity_record in self.filtered(lambda activity: activity.active):
-            activity_record.sh_state = activity_record.state
+        # ~ for activity_record in self.filtered(lambda activity: activity.active):
+            # ~ activity_record.sh_state = activity_record.state
 
     @api.model_create_multi
     def create(self, vals_list):
