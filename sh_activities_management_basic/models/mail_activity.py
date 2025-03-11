@@ -128,9 +128,15 @@ class MailActivity(models.Model):
         self.activity_cancel = False
         self._compute_state()
 
-    @api.depends('date_deadline')
+    @api.depends('active', 'date_deadline')
     def _compute_state(self):
         super(MailActivity, self)._compute_state()
+
+        for record in self.filtered(lambda activity: activity.date_deadline):
+            tz = record.user_id.sudo().tz
+            date_deadline = record.date_deadline
+            record.state = 'done' if not record.active else self._compute_state_from_date(date_deadline, tz)
+
         for record in self.filtered(lambda activity: not activity.active):
             _logger.info('=================1================')
             _logger.info(record.state)
@@ -138,12 +144,9 @@ class MailActivity(models.Model):
                 record.state = 'cancel'
             if record.activity_done:
                 record.state = 'done'
-            else:
-                tz = record.user_id.sudo().tz
-                date_deadline = record.date_deadline
-                record.state = self._compute_state_from_date(date_deadline, tz)
             _logger.info(record.state)
             _logger.info('================2=================')
+            
         for activity_record in self.filtered(lambda activity: activity.active):
             activity_record.sh_state = activity_record.state
 
