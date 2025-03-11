@@ -70,7 +70,7 @@ class MailActivity(models.Model):
         "sh.activity.tags", string='Activity Tags')
     state = fields.Selection(
         selection_add=[("done", "Done"), ("cancel", "Cancelled")],
-        compute="_compute_state",
+        #compute="_compute_state",
         search='_search_state'
     )
     sh_state = fields.Selection([('overdue', 'Overdue'), ('today', 'Today'), (
@@ -126,7 +126,7 @@ class MailActivity(models.Model):
         self.ensure_one()
         self.activity_done = False
         self.activity_cancel = False
-        self._compute_state()
+        #self._compute_state()
 
     @api.depends('date_deadline')
     def _compute_state(self):
