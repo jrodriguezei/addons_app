@@ -164,6 +164,10 @@ class MailActivity(models.Model):
                             'note': res.note,
                         })
                 res.sh_user_ids = [(6,0,[])]
+            _logger.info('-------------------')
+            _logger.info(res)
+            _logger.info(res.state)
+            _logger.info('-------------------')
             if res.state:
                 res.sh_state = res.state
         return res_values
