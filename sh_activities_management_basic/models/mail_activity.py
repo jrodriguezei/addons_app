@@ -175,9 +175,6 @@ class MailActivity(models.Model):
                             'note': res.note,
                         })
                 res.sh_user_ids = [(6,0,[])]
-            _logger.info('-------------------')
-            _logger.info(res)
-            _logger.info('-------------------')
             try:
                 if res.state:
                     res.sh_state = res.state
@@ -429,7 +426,7 @@ class MailActivity(models.Model):
             mail_template_dict = dict([(mail_template['id'], mail_template) for mail_template in mail_template_info])
             for activity in activities:
                 activity['mail_template_ids'] = [mail_template_dict[mail_template_id] for mail_template_id in activity['mail_template_ids']]
-        return activities
+            return activities
 
     
 # class ResUsers(models.Model):
