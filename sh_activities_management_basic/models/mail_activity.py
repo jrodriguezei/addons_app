@@ -69,7 +69,7 @@ class MailActivity(models.Model):
     sh_activity_tags = fields.Many2many(
         "sh.activity.tags", string='Activity Tags')
     state = fields.Selection(
-        selection_add=[("cancel", "Cancelled")],
+        selection_add=[("done", "Done"), ("cancel", "Cancelled")],
         compute="_compute_state",
         search='_search_state'
     )
@@ -128,52 +128,16 @@ class MailActivity(models.Model):
         self.activity_cancel = False
         self._compute_state()
 
-    # ~ @api.depends('active', 'date_deadline')
-    # ~ def _compute_state(self):
-        # ~ super(MailActivity, self)._compute_state()
-
-        # ~ for record in self.filtered(lambda activity: not activity.active):
-            # ~ _logger.info('=================1================')
-            # ~ _logger.info(record.state)
-            # ~ if record.activity_cancel:
-                # ~ record.state = 'cancel'
-            # ~ if record.activity_done:
-                # ~ record.state = 'done'
-            # ~ _logger.info(record.state)
-            # ~ _logger.info('================2=================')
-            
-        # ~ for activity_record in self.filtered(lambda activity: activity.active):
-            # ~ activity_record.sh_state = activity_record.state
-
-
-    @api.depends('active', 'date_deadline')
+    @api.depends('date_deadline')
     def _compute_state(self):
-        """Hereda y extiende el cálculo del estado de la actividad."""
-        
-        super()._compute_state()
-
-        for record in self:
-            tz = record.user_id.sudo().tz
-            date_deadline = record.date_deadline
-            if not record.active:
-                _logger.info('=================1================')
-                _logger.info(record.state)
-
-                # Asegurar que `state` siempre tenga un valor
-                if record.activity_cancel:
-                    record.state = 'cancel'
-                elif record.activity_done:
-                    record.state = 'done'
-                else:
-                    record.state = self._compute_state_from_date(date_deadline, tz)
-                
-                _logger.info(record.state)
-                _logger.info('================2=================')
-            
-            # Si el registro está activo
-            else:
-                record.sh_state = record.state or self._compute_state_from_date(date_deadline, tz)
-
+        super(MailActivity, self)._compute_state()
+        for record in self.filtered(lambda activity: not activity.active):
+            if record.activity_cancel:
+                record.state = 'cancel'
+            if record.activity_done:
+                record.state = 'done'
+        for activity_record in self.filtered(lambda activity: activity.active):
+            activity_record.sh_state = activity_record.state
 
     @api.model_create_multi
     def create(self, vals_list):
