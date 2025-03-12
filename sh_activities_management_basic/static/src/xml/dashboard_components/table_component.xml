@@ -38,10 +38,9 @@
                                     <b>
                                         <span>
                                             <t t-esc="v.status_name" />
+                                            <span t-esc="v.status_name == 'All Activities' and 'Todas las Actividades' or v.status_name"/>
                                         </span>
                                     </b>
-
-                                   
                                 </button>
 
 
