@@ -34,7 +34,8 @@
                                                     <span class="fa fa-clock-o fs-20 text-white align-self-center mr-3" style="font-size:38px"></span>
                                                     <div style="display: flex;color: white;flex-direction:column;margin-left:12px">
                                                         <span t-esc="data_dict_act[v].length"></span>
-                                                        <span t-esc="v"/>                                                                                                           
+                                                        <!--<span t-esc="v"/>-->
+                                                        <span t-esc="v == 'Planned Activities' and 'Actividades Previstas' or v"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -51,7 +52,8 @@
                                                     <span class="fa fa-clock-o fs-20 text-white align-self-center mr-3" style="font-size:38px"></span>
                                                     <div style="display: flex;color: white;flex-direction:column;margin-left:12px">
                                                         <span t-esc="data_dict_act[v].length"></span>
-                                                        <span t-esc="v"/>                                                                                                           
+                                                        <!--<span t-esc="v"/>-->
+                                                        <span t-esc="v == 'Completed Activities' and 'Actividades Realizadas' or v"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -68,7 +70,8 @@
                                                     <span class="fa fa-clock-o fs-20 text-white align-self-center mr-3" style="font-size:38px"></span>
                                                     <div style="display: flex;color: white;flex-direction:column;margin-left:12px">
                                                         <span t-esc="data_dict_act[v].length"></span>
-                                                        <span t-esc="v"/>                                                                                                           
+                                                        <!--<span t-esc="v"/>-->
+                                                        <span t-esc="v == 'Overdue Activities' and 'Actividades Pendientes' or v"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -85,7 +88,8 @@
                                                     <span class="fa fa-clock-o fs-20 text-white align-self-center mr-3" style="font-size:38px"></span>
                                                     <div style="display: flex;color: white;flex-direction:column;margin-left:12px">
                                                         <span t-esc="data_dict_act[v].length"></span>
-                                                        <span t-esc="v"/>                                                                                                           
+                                                        <!--<span t-esc="v"/>-->
+                                                        <span t-esc="v == 'Cancelled Activities' and 'Actividades Canceladas' or v"/>
                                                     </div>
                                                 </div>
                                             </div>
