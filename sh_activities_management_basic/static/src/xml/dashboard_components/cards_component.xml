@@ -17,7 +17,7 @@
                                                     <div style="display: flex;color: white;flex-direction:column;margin-left:12px">
                                                         <span t-esc="data_dict_act[v].length"></span>
                                                         <!--<span t-esc="v"/>-->
-                                                        <span t-esc="v == 'All activities' and 'Todas las Actividades' or v"/>
+                                                        <span t-esc="v == 'All Activities' and 'Todas las Actividades' or v"/>
                                                     </div>
                                                 </div>
                                             </div>
