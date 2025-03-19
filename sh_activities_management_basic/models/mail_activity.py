@@ -70,7 +70,7 @@ class MailActivity(models.Model):
         "sh.activity.tags", string='Activity Tags')
     state = fields.Selection(
         selection_add=[("done", "Done"), ("cancel", "Cancelled")],
-        #compute="_compute_state",
+        compute="_compute_state",
         search='_search_state'
     )
     sh_state = fields.Selection([('overdue', 'Overdue'), ('today', 'Today'), (
@@ -126,11 +126,11 @@ class MailActivity(models.Model):
         self.ensure_one()
         self.activity_done = False
         self.activity_cancel = False
-        #self._compute_state()
+        self._compute_state()
 
-    @api.depends('date_deadline')
+    @api.depends('active','date_deadline')
     def _compute_state(self):
-        super(MailActivity, self)._compute_state()
+        result= super(MailActivity, self)._compute_state()
         for record in self.filtered(lambda activity: not activity.active):
             if record.activity_cancel:
                 record.state = 'cancel'
@@ -138,6 +138,7 @@ class MailActivity(models.Model):
                 record.state = 'done'
         for activity_record in self.filtered(lambda activity: activity.active):
             activity_record.sh_state = activity_record.state
+        return result
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -164,11 +165,8 @@ class MailActivity(models.Model):
                             'note': res.note,
                         })
                 res.sh_user_ids = [(6,0,[])]
-            try:
-                if res.state:
-                    res.sh_state = res.state
-            except Exception:
-                _logger.exception('No asignado state')
+            if res.state:
+                res.sh_state = res.state
         return res_values
 
     def write(self, vals):

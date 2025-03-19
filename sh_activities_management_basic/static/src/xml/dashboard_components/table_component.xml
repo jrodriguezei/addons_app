@@ -37,15 +37,11 @@
                                     aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
                                     <b>
                                         <span>
-                                            <!-- <t t-esc="v.status_name" />-->
-                                            <span t-esc="v.status_name == 'All Activities' and 'Todas las Actividades'
-                                            or v.status_name == 'Planned Activities' and 'Actividades Previstas'
-                                            or v.status_name == 'Completed Activities' and 'Actividades Realizadas'
-                                            or v.status_name == 'Overdue Activities' and 'Actividades Pendientes'
-                                            or v.status_name == 'Cancelled Activities' and 'Actividades Canceladas'
-                                            or v.status_name"/>
+                                            <t t-esc="v.status_name" />
                                         </span>
                                     </b>
+
+                                   
                                 </button>
 
 
