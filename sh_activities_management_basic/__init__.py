@@ -12,3 +12,12 @@ def uninstall_hook(env):
         activity_rule.write({
             'domain_force':"['|', ('user_id', '=', user.id), ('create_uid', '=', user.id)]"
         })
+        
+def _sh_activity_post_init(env):
+    activities = env['mail.activity'].sudo().search([])
+    if activities:
+        for activity in activities:
+            activity.sudo().write({
+                'active':True
+            })
+            activity.onchange_state()

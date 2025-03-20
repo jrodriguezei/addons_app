@@ -48,3 +48,10 @@ class ResConfigSettings(models.TransientModel):
     sh_display_completed_activities_table = fields.Boolean('Completed Activities',related='company_id.sh_display_completed_activities_table',readonly=False)
     sh_display_overdue_activities_table = fields.Boolean('Overdue Activities',related='company_id.sh_display_overdue_activities_table',readonly=False)
     sh_display_cancelled_activities_table = fields.Boolean('Cancelled Activities',related='company_id.sh_display_cancelled_activities_table',readonly=False)
+    
+    def action_update_activity_data(self):
+        activities = self.env['mail.activity'].sudo().search([('active','!=',False),('activity_cancel','=',False),('activity_done','=',False)])
+        if activities:
+            for activity in activities:
+                activity.active = True
+                activity.onchange_state()

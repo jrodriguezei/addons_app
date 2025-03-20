@@ -80,6 +80,11 @@
 							</setting>
 							
 						</block>
+						<block >
+							<setting>
+								<button name="action_update_activity_data" type="object" string="Update Old Activity Data" class="btn btn-primary"/>
+							</setting>
+						</block>
 					</app>              
 				</xpath>
 			</field>

@@ -19,3 +19,7 @@ Initial Release
 17.0.5 (Date: 19th March 2025)
 --------------------------------
 [FIX] Fix the issue of standard state field value.
+
+17.0.6 (Date: 20th March 2025)
+--------------------------------
+[FIX] Fix the issue of Update Old record.
