@@ -23,3 +23,7 @@ Initial Release
 17.0.6 (Date: 20th March 2025)
 --------------------------------
 [FIX] Fix the issue of Update Old record.
+
+17.0.7 (Date: 25th March 2025)
+--------------------------------
+[FIX] Fix the issue of Update Old record Activity.

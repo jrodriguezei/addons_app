@@ -110,7 +110,7 @@ class ActivityDashboard(models.Model):
         result_all = self._cr.fetchall()
 
         all_activities_ids = [r[0] for r in result_all]
-        activities = self.env['mail.activity'].browse(all_activities_ids)
+        activities = self.env['mail.activity'].search([('id','in',all_activities_ids)])
 
         # return {}
 
@@ -137,7 +137,7 @@ class ActivityDashboard(models.Model):
         result_planned_activities = self._cr.fetchall()
 
         planned_activities_list = [r[0] for r in result_planned_activities]
-        planned_activities = self.env['mail.activity'].browse(planned_activities_list)
+        planned_activities = self.env['mail.activity'].search([('id','in',planned_activities_list)])
         
         # -------------------------------------
         # PLANNED ACTIVITES
@@ -164,7 +164,7 @@ class ActivityDashboard(models.Model):
 
         
         overdue_activities_list = [r[0] for r in result_overdue_activities]
-        overdue_activities = self.env['mail.activity'].browse(overdue_activities_list)
+        overdue_activities = self.env['mail.activity'].search([('id','in',overdue_activities_list)])
 
         # -------------------------------------
         # OVERDUE ACTIVITES
@@ -187,7 +187,7 @@ class ActivityDashboard(models.Model):
         self.env.cr.execute(query, where_params_completed_activities)    
         result_completed_activities = self._cr.fetchall()
         completed_activities_list = [r[0] for r in result_completed_activities]
-        completed_activities = self.env['mail.activity'].browse(completed_activities_list)
+        completed_activities = self.env['mail.activity'].search([('id','in',completed_activities_list)])
         # -------------------------------------
         # COMPLETED ACTIVITES
         # ------------------------------------- 
@@ -212,7 +212,7 @@ class ActivityDashboard(models.Model):
         result_cancelled_activities = self._cr.fetchall()
         
         cancelled_activities_list = [r[0] for r in result_cancelled_activities]
-        cancelled_activities = self.env['mail.activity'].browse(cancelled_activities_list)
+        cancelled_activities = self.env['mail.activity'].search([('id','in',cancelled_activities_list)])
         
 
         # -------------------------------------
@@ -525,7 +525,7 @@ class ActivityDashboard(models.Model):
                         tem_act.append(activity_data_list)
             if each == 'Planned Activities':
                 act_count = len(planned_activities)
-                planned_activities = self.env['mail.activity'].browse(planned_activities_list)              
+                planned_activities = self.env['mail.activity'].search([('id','in',planned_activities_list)])      
                 if act_count > 0:
                     for t in planned_activities:
                         activity_data_list = [
