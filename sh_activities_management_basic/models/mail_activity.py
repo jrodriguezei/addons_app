@@ -128,17 +128,17 @@ class MailActivity(models.Model):
         self.activity_cancel = False
         self._compute_state()
 
-    @api.depends('active','date_deadline')
-    def _compute_state(self):
-        result= super(MailActivity, self)._compute_state()
-        for record in self.filtered(lambda activity: not activity.active):
-            if record.activity_cancel:
-                record.state = 'cancel'
-            if record.activity_done:
-                record.state = 'done'
-        for activity_record in self.filtered(lambda activity: activity.active):
-            activity_record.sh_state = activity_record.state
-        return result
+    # @api.depends('active','date_deadline')
+    # def _compute_state(self):
+    #     result= super(MailActivity, self)._compute_state()
+    #     for record in self.filtered(lambda activity: not activity.active):
+    #         if record.activity_cancel:
+    #             record.state = 'cancel'
+    #         if record.activity_done:
+    #             record.state = 'done'
+    #     for activity_record in self.filtered(lambda activity: activity.active):
+    #         activity_record.sh_state = activity_record.state
+    #     return result
 
     @api.model_create_multi
     def create(self, vals_list):
