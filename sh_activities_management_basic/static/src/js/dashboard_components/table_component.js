@@ -80,17 +80,19 @@ export class ActivityTableDashboardView extends Component {
         let ActivityID = $(ev.target).parents('tr').find("#activity_id").attr("value")
         const result = await this.orm.call("mail.activity", "action_cancel_dashboard", [ActivityID]);
         console.log("result",result)
-        if (result.cancelled == true) {
-            location.reload(true);
-        }
+        location.reload(true);
+        // if (result.cancelled == true) {
+        //     location.reload(true);
+        // }
     }
     async _onClickUnarchive(ev) {
         let ActivityID = $(ev.target).parents('tr').find("#activity_id").attr("value")
         const result = await this.orm.call("mail.activity", "unarchive_dashboard", [ActivityID]);
         console.log("result",result)
-        if (result.unarchive == true) {
-            location.reload(true);
-        }
+        location.reload(true);
+        // if (result.unarchive == true) {
+        //     location.reload(true);
+        // }
     }
     async _onClickDone(ev) {
         let ActivityID = $(ev.target).parents('tr').find("#activity_id").attr("value")

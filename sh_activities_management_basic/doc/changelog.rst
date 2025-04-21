@@ -31,3 +31,7 @@ Initial Release
 17.0.8 (Date: 31st March 2025)
 --------------------------------
 [FIX] Fix the issue of Update Old record Activity.
+
+17.0.9 (Date: 21st April 2025)
+---------------------------------
+[FIX] issue of getting error on opening the dashboard.

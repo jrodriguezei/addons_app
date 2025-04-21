@@ -128,17 +128,17 @@ class MailActivity(models.Model):
         self.activity_cancel = False
         self._compute_state()
 
-    # @api.depends('active','date_deadline')
-    # def _compute_state(self):
-    #     result= super(MailActivity, self)._compute_state()
-    #     for record in self.filtered(lambda activity: not activity.active):
-    #         if record.activity_cancel:
-    #             record.state = 'cancel'
-    #         if record.activity_done:
-    #             record.state = 'done'
-    #     for activity_record in self.filtered(lambda activity: activity.active):
-    #         activity_record.sh_state = activity_record.state
-    #     return result
+    @api.depends('active','date_deadline')
+    def _compute_state(self):
+        result= super(MailActivity, self)._compute_state()
+        for record in self.filtered(lambda activity: not activity.active):
+            if record.activity_cancel:
+                record.state = 'cancel'
+            if record.activity_done:
+                record.state = 'done'
+        for activity_record in self.filtered(lambda activity: activity.active):
+            activity_record.sh_state = activity_record.state
+        return result
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -414,7 +414,21 @@ class MailActivity(models.Model):
             activity['mail_template_ids'] = [mail_template_dict[mail_template_id] for mail_template_id in activity['mail_template_ids']]
         return activities
 
+    @api.model
+    def action_cancel_dashboard(self,activity_id):
+        mail_activity_id = self.env['mail.activity'].sudo().browse(int(activity_id))
+        if mail_activity_id:
+            mail_activity_id.action_cancel()
+            if mail_activity_id.state == 'cancel':
+                return {'cancelled':True}
     
+    @api.model
+    def unarchive_dashboard(self,activity_id):
+        mail_activity_id = self.env['mail.activity'].sudo().browse(int(activity_id))
+        if mail_activity_id:
+            mail_activity_id.unarchive()
+            return {'unarchive':True}
+
 # class ResUsers(models.Model):
 #     _inherit = 'res.users'
 
@@ -592,1288 +606,1288 @@ class MailActivity(models.Model):
 #         return activities
 
 
-class ActivityDashboard(models.Model):
-    _name = 'activity.dashboard'
-    _description = 'Activity Dashboard'
+# class ActivityDashboard(models.Model):
+#     _name = 'activity.dashboard'
+#     _description = 'Activity Dashboard'
 
-    @api.model
-    def get_document_models(self):
-        document_models = False
-        uid = request.session.uid
-        user = request.env['res.users'].sudo().browse(uid)
-        cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
-        cids = [int(cid) for cid in cids.split(',')]
-        company_id = request.env['res.company'].sudo().browse(cids[0])
-        if company_id.sh_document_model:
-            if company_id.sh_document_model_ids:
-                domain = [('id','in',company_id.sh_document_model_ids.ids)]
-                document_models = request.env["ir.model"].sudo().search_read(domain,['id','name'])
-        return document_models
+#     @api.model
+#     def get_document_models(self):
+#         document_models = False
+#         uid = request.session.uid
+#         user = request.env['res.users'].sudo().browse(uid)
+#         cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
+#         cids = [int(cid) for cid in cids.split(',')]
+#         company_id = request.env['res.company'].sudo().browse(cids[0])
+#         if company_id.sh_document_model:
+#             if company_id.sh_document_model_ids:
+#                 domain = [('id','in',company_id.sh_document_model_ids.ids)]
+#                 document_models = request.env["ir.model"].sudo().search_read(domain,['id','name'])
+#         return document_models
 
-    @api.model
-    def get_sh_crm_activity_planned_count_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor):
-        uid = request.session.uid
-        user = request.env['res.users'].sudo().browse(uid)
-        cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
-        cids = [int(cid) for cid in cids.split(',')]
-        doman = [
-            ('company_id', 'in', cids)
-        ]
-        crm_days_filter = filter_date
-        custom_date_start = start_date
-        custom_date_end = end_date
-        if crm_days_filter == 'today':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'yesterday':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt1.append(prev_day)
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt2.append(prev_day)
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'weekly':  # current week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_week':  # Previous week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'monthly':  # Current Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_month':  # Previous Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'cur_year':  # Current Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_year':  # Previous Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'custom':
-            if custom_date_start and custom_date_end:
-                dt_flt1 = []
-                dt_flt1.append('date_deadline')
-                dt_flt1.append('>')
-                dt_flt1.append(datetime.strptime(
-                    str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt1))
-                dt_flt2 = []
-                dt_flt2.append('date_deadline')
-                dt_flt2.append('<=')
-                dt_flt2.append(datetime.strptime(
-                    str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt2))
-        # FILTER USER
-        if filter_user not in ['', "", None, False]:
-            doman.append(('|'))
-            doman.append(('sh_user_ids', 'in', [int(filter_user)]))
-            doman.append(('user_id', '=', int(filter_user)))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('user_id', '!=', self.env.user.id))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#     @api.model
+#     def get_sh_crm_activity_planned_count_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor):
+#         uid = request.session.uid
+#         user = request.env['res.users'].sudo().browse(uid)
+#         cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
+#         cids = [int(cid) for cid in cids.split(',')]
+#         doman = [
+#             ('company_id', 'in', cids)
+#         ]
+#         crm_days_filter = filter_date
+#         custom_date_start = start_date
+#         custom_date_end = end_date
+#         if crm_days_filter == 'today':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'yesterday':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt1.append(prev_day)
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt2.append(prev_day)
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'weekly':  # current week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_week':  # Previous week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'monthly':  # Current Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_month':  # Previous Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'cur_year':  # Current Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_year':  # Previous Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'custom':
+#             if custom_date_start and custom_date_end:
+#                 dt_flt1 = []
+#                 dt_flt1.append('date_deadline')
+#                 dt_flt1.append('>')
+#                 dt_flt1.append(datetime.strptime(
+#                     str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt1))
+#                 dt_flt2 = []
+#                 dt_flt2.append('date_deadline')
+#                 dt_flt2.append('<=')
+#                 dt_flt2.append(datetime.strptime(
+#                     str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt2))
+#         # FILTER USER
+#         if filter_user not in ['', "", None, False]:
+#             doman.append(('|'))
+#             doman.append(('sh_user_ids', 'in', [int(filter_user)]))
+#             doman.append(('user_id', '=', int(filter_user)))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '!=', self.env.user.id))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
 
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-                doman.append(('user_id', '=', self.env.user.id))
-        if filter_supervisor not in ['', "", None, False]:
-            doman.append(('supervisor_id', '=', int(filter_supervisor)))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-                doman.append(('user_id', '=', self.env.user.id))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('supervisor_id', '!=', self.env.user.id))
-                doman.append(('supervisor_id', '=', False))
-        doman.append(('|'))
-        doman.append(('active', '=', True))
-        doman.append(('active', '=', False))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#         if filter_supervisor not in ['', "", None, False]:
+#             doman.append(('supervisor_id', '=', int(filter_supervisor)))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('supervisor_id', '!=', self.env.user.id))
+#                 doman.append(('supervisor_id', '=', False))
+#         doman.append(('|'))
+#         doman.append(('active', '=', True))
+#         doman.append(('active', '=', False))
         
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
+#         from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
 
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
-        '''
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
+#         '''
 
-        self.env.cr.execute(query, where_params_all_activities)    
-        result_all = self._cr.fetchall()
+#         self.env.cr.execute(query, where_params_all_activities)    
+#         result_all = self._cr.fetchall()
 
-        all_activities_ids = [r[0] for r in result_all]
-        activities = self.env['mail.activity'].browse(all_activities_ids)
+#         all_activities_ids = [r[0] for r in result_all]
+#         activities = self.env['mail.activity'].browse(all_activities_ids)
         
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        # return {}
+#         # return {}
 
-        # -------------------------------------
-        # PLANNED ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # PLANNED ACTIVITES
+#         # -------------------------------------
 
-        # planned_doman = doman.copy()
-        planned_doman = expression.AND([doman.copy(), [('active','=',True)]])
-        planned_doman = expression.AND([doman.copy(), [('date_deadline','!=',False)]])
-        planned_doman = expression.AND([doman.copy(), [('date_deadline','>=',fields.Date.today())]])
+#         # planned_doman = doman.copy()
+#         planned_doman = expression.AND([doman.copy(), [('active','=',True)]])
+#         planned_doman = expression.AND([doman.copy(), [('date_deadline','!=',False)]])
+#         planned_doman = expression.AND([doman.copy(), [('date_deadline','>=',fields.Date.today())]])
              
-        from_clause, where_clause_planned_activities, where_params_planned_activities = self.env['mail.activity']._where_calc(planned_doman).get_sql()
+#         from_clause, where_clause_planned_activities, where_params_planned_activities = self.env['mail.activity']._where_calc(planned_doman).get_sql()
 
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_planned_activities}
-        '''
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_planned_activities}
+#         '''
 
-        self.env.cr.execute(query, where_params_planned_activities)    
-        result_planned_activities = self._cr.fetchall()
+#         self.env.cr.execute(query, where_params_planned_activities)    
+#         result_planned_activities = self._cr.fetchall()
 
-        planned_activities_list = [r[0] for r in result_planned_activities]
-        planned_activities = self.env['mail.activity'].browse(planned_activities_list)
+#         planned_activities_list = [r[0] for r in result_planned_activities]
+#         planned_activities = self.env['mail.activity'].browse(planned_activities_list)
         
-        # -------------------------------------
-        # PLANNED ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # PLANNED ACTIVITES
+#         # -------------------------------------
 
-        # -------------------------------------
-        # OVERDUE ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # OVERDUE ACTIVITES
+#         # -------------------------------------
           
-        # overdue_doman = doman.copy()
-        overdue_doman = expression.AND([doman.copy(), [('active','=',True)]])
-        overdue_doman = expression.AND([doman.copy(), [('date_deadline','!=',False)]])
-        overdue_doman = expression.AND([doman.copy(), [('date_deadline','<',fields.Date.today())]])
+#         # overdue_doman = doman.copy()
+#         overdue_doman = expression.AND([doman.copy(), [('active','=',True)]])
+#         overdue_doman = expression.AND([doman.copy(), [('date_deadline','!=',False)]])
+#         overdue_doman = expression.AND([doman.copy(), [('date_deadline','<',fields.Date.today())]])
 
-        from_clause, where_clause_overdue_activities, where_params_overdue_activities = self.env['mail.activity']._where_calc(overdue_doman).get_sql()
+#         from_clause, where_clause_overdue_activities, where_params_overdue_activities = self.env['mail.activity']._where_calc(overdue_doman).get_sql()
 
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_overdue_activities}
-        '''
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_overdue_activities}
+#         '''
 
-        self.env.cr.execute(query, where_params_overdue_activities)    
-        result_overdue_activities = self._cr.fetchall()
+#         self.env.cr.execute(query, where_params_overdue_activities)    
+#         result_overdue_activities = self._cr.fetchall()
 
         
-        overdue_activities_list = [r[0] for r in result_overdue_activities]
-        overdue_activities = self.env['mail.activity'].browse(overdue_activities_list)
+#         overdue_activities_list = [r[0] for r in result_overdue_activities]
+#         overdue_activities = self.env['mail.activity'].browse(overdue_activities_list)
 
-        # -------------------------------------
-        # OVERDUE ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # OVERDUE ACTIVITES
+#         # -------------------------------------
 
-        # -------------------------------------
-        # COMPLETED ACTIVITES
-        # ------------------------------------- 
+#         # -------------------------------------
+#         # COMPLETED ACTIVITES
+#         # ------------------------------------- 
         
-        # completed_doman = doman.copy()
-        completed_doman = expression.AND([doman.copy(), [('active','=',True)]])
-        completed_doman = expression.AND([doman.copy(), [('state','=','done')]])
+#         # completed_doman = doman.copy()
+#         completed_doman = expression.AND([doman.copy(), [('active','=',True)]])
+#         completed_doman = expression.AND([doman.copy(), [('state','=','done')]])
 
-        from_clause, where_clause_completed_activities, where_params_completed_activities = self.env['mail.activity']._where_calc(completed_doman).get_sql()
+#         from_clause, where_clause_completed_activities, where_params_completed_activities = self.env['mail.activity']._where_calc(completed_doman).get_sql()
 
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_completed_activities}
-        '''
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_completed_activities}
+#         '''
 
-        self.env.cr.execute(query, where_params_completed_activities)    
-        result_completed_activities = self._cr.fetchall()
+#         self.env.cr.execute(query, where_params_completed_activities)    
+#         result_completed_activities = self._cr.fetchall()
 
-        completed_activities_list = [r[0] for r in result_completed_activities]
-        completed_activities = self.env['mail.activity'].browse(completed_activities_list)
+#         completed_activities_list = [r[0] for r in result_completed_activities]
+#         completed_activities = self.env['mail.activity'].browse(completed_activities_list)
         
-        # -------------------------------------
-        # COMPLETED ACTIVITES
-        # ------------------------------------- 
+#         # -------------------------------------
+#         # COMPLETED ACTIVITES
+#         # ------------------------------------- 
 
-        # -------------------------------------
-        # CANCELLED ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # CANCELLED ACTIVITES
+#         # -------------------------------------
 
 
-        # cancelled_doman = doman.copy()
-        cancelled_doman = expression.AND([doman.copy(), [('active','=',False)]])
-        cancelled_doman = expression.AND([doman.copy(), [('state','=','cancel')]])
+#         # cancelled_doman = doman.copy()
+#         cancelled_doman = expression.AND([doman.copy(), [('active','=',False)]])
+#         cancelled_doman = expression.AND([doman.copy(), [('state','=','cancel')]])
 
-        from_clause, where_clause_cancelled_activities, where_params_cancelled_activities = self.env['mail.activity']._where_calc(cancelled_doman).get_sql()
+#         from_clause, where_clause_cancelled_activities, where_params_cancelled_activities = self.env['mail.activity']._where_calc(cancelled_doman).get_sql()
 
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_cancelled_activities}
-        '''
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_cancelled_activities}
+#         '''
 
-        self.env.cr.execute(query, where_params_cancelled_activities)    
-        result_cancelled_activities = self._cr.fetchall()
+#         self.env.cr.execute(query, where_params_cancelled_activities)    
+#         result_cancelled_activities = self._cr.fetchall()
         
-        cancelled_activities_list = [r[0] for r in result_cancelled_activities]
-        cancelled_activities = self.env['mail.activity'].browse(cancelled_activities_list)
+#         cancelled_activities_list = [r[0] for r in result_cancelled_activities]
+#         cancelled_activities = self.env['mail.activity'].browse(cancelled_activities_list)
+#         print("\n\n\ncancelled_activities",cancelled_activities)
+
+#         # -------------------------------------
+#         # CANCELLED ACTIVITES
+#         # -------------------------------------
+#         return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_count_box', {
+#             'planned_activities': planned_activities_list,
+#             'overdue_activities': overdue_activities_list,
+#             'all_activities': all_activities_ids,
+#             'completed_activities': completed_activities_list,
+#             'planned_acitvities_count': len(planned_activities),
+#             'overdue_activities_count': len(overdue_activities),
+#             'completed_activities_count': len(completed_activities),
+#             'cancelled_activities_count': len(cancelled_activities),
+#             'cancelled_activities': cancelled_activities_list,
+#             'all_activities_count': len(activities.ids),
+#         })
+
+#     @api.model
+#     def get_sh_crm_activity_todo_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
+#         uid = request.session.uid
+#         user = request.env['res.users'].sudo().browse(uid)
+#         cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
+#         cids = [int(cid) for cid in cids.split(',')]
+#         doman = [
+#             ('company_id', 'in', cids),
+#             ('active', '=', True),
+#             ('date_deadline', '>=', fields.Date.today())
+#         ]
+#         crm_days_filter = filter_date
+#         custom_date_start = start_date
+#         custom_date_end = end_date
+#         if crm_days_filter == 'today':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'yesterday':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt1.append(prev_day)
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt2.append(prev_day)
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'weekly':  # current week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_week':  # Previous week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'monthly':  # Current Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_month':  # Previous Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'cur_year':  # Current Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_year':  # Previous Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'custom':
+#             if custom_date_start and custom_date_end:
+#                 dt_flt1 = []
+#                 dt_flt1.append('date_deadline')
+#                 dt_flt1.append('>')
+#                 dt_flt1.append(datetime.strptime(
+#                     str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt1))
+#                 dt_flt2 = []
+#                 dt_flt2.append('date_deadline')
+#                 dt_flt2.append('<=')
+#                 dt_flt2.append(datetime.strptime(
+#                     str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt2))
+#         # FILTER USER
+#         if filter_user not in ['', "", None, False]:
+#             doman.append(('|'))
+#             doman.append(('sh_user_ids', 'in', [int(filter_user)]))
+#             doman.append(('user_id', '=', int(filter_user)))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '!=', self.env.user.id))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#         if filter_supervisor not in ['', "", None, False]:
+#             doman.append(('supervisor_id', '=', int(filter_supervisor)))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('supervisor_id', '!=', self.env.user.id))
+#                 doman.append(('supervisor_id', '=', False))
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
+
+#         from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
+
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
+#         '''
+
+#         self.env.cr.execute(query, where_params_all_activities)    
+#         result_all = self._cr.fetchall()
+
+#         all_activities_ids = [r[0] for r in result_all]
+#         activities = self.env['mail.activity'].browse(all_activities_ids)
+
+#         # return {}
+
+#         # -------------------------------------
+#         # PLANNED ACTIVITES
+#         # -------------------------------------
+
+#         total_pages = 0.0
+#         total_planned_activities = len(all_activities_ids)
+#         record_limit = self.env.company.sh_planned_table
+#         if total_planned_activities > 0 and record_limit > 0:
+#             total_pages = math.ceil(
+#                 float(total_planned_activities) / float(record_limit))
+#         current_page = int(current_page)
+#         start = self.env.company.sh_planned_table * (current_page-1)
+#         stop = current_page * self.env.company.sh_planned_table
+#         activities = activities[start:stop]
+#         return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_todo_tbl', {
+#             'activities': activities,
+#             'planned_acitvities_count': total_planned_activities,
+#             'total_pages': total_pages,
+#             'current_page': current_page,
+#         })
+
+#     @api.model
+#     def get_sh_crm_activity_all_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
+#         uid = request.session.uid
+#         user = request.env['res.users'].sudo().browse(uid)
+#         cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
+#         cids = [int(cid) for cid in cids.split(',')]
+#         doman = [('company_id', 'in', cids)]
+#         crm_days_filter = filter_date
+#         custom_date_start = start_date
+#         custom_date_end = end_date
+#         if crm_days_filter == 'today':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'yesterday':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt1.append(prev_day)
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt2.append(prev_day)
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'weekly':  # current week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_week':  # Previous week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'monthly':  # Current Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_month':  # Previous Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'cur_year':  # Current Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_year':  # Previous Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'custom':
+#             if custom_date_start and custom_date_end:
+#                 dt_flt1 = []
+#                 dt_flt1.append('date_deadline')
+#                 dt_flt1.append('>')
+#                 dt_flt1.append(datetime.strptime(
+#                     str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt1))
+#                 dt_flt2 = []
+#                 dt_flt2.append('date_deadline')
+#                 dt_flt2.append('<=')
+#                 dt_flt2.append(datetime.strptime(
+#                     str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt2))
+#         # FILTER USER
+#         if filter_user not in ['', "", None, False]:
+#             doman.append(('|'))
+#             doman.append(('sh_user_ids', 'in', [int(filter_user)]))
+#             doman.append(('user_id', '=', int(filter_user)))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '!=', self.env.user.id))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#         if filter_supervisor not in ['', "", None, False]:
+#             doman.append(('supervisor_id', '=', int(filter_supervisor)))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('supervisor_id', '!=', self.env.user.id))
+#                 doman.append(('supervisor_id', '=', False))
+#         doman.append(('|'))
+#         doman.append(('active', '=', True))
+#         doman.append(('active', '=', False))
         
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        # -------------------------------------
-        # CANCELLED ACTIVITES
-        # -------------------------------------
-        return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_count_box', {
-            'planned_activities': planned_activities_list,
-            'overdue_activities': overdue_activities_list,
-            'all_activities': all_activities_ids,
-            'completed_activities': completed_activities_list,
-            'planned_acitvities_count': len(planned_activities),
-            'overdue_activities_count': len(overdue_activities),
-            'completed_activities_count': len(completed_activities),
-            'cancelled_activities_count': len(cancelled_activities),
-            'cancelled_activities': cancelled_activities_list,
-            'all_activities_count': len(activities.ids),
-        })
+#         from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
 
-    @api.model
-    def get_sh_crm_activity_todo_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
-        uid = request.session.uid
-        user = request.env['res.users'].sudo().browse(uid)
-        cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
-        cids = [int(cid) for cid in cids.split(',')]
-        doman = [
-            ('company_id', 'in', cids),
-            ('active', '=', True),
-            ('date_deadline', '>=', fields.Date.today())
-        ]
-        crm_days_filter = filter_date
-        custom_date_start = start_date
-        custom_date_end = end_date
-        if crm_days_filter == 'today':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'yesterday':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt1.append(prev_day)
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt2.append(prev_day)
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'weekly':  # current week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_week':  # Previous week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'monthly':  # Current Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_month':  # Previous Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'cur_year':  # Current Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_year':  # Previous Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'custom':
-            if custom_date_start and custom_date_end:
-                dt_flt1 = []
-                dt_flt1.append('date_deadline')
-                dt_flt1.append('>')
-                dt_flt1.append(datetime.strptime(
-                    str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt1))
-                dt_flt2 = []
-                dt_flt2.append('date_deadline')
-                dt_flt2.append('<=')
-                dt_flt2.append(datetime.strptime(
-                    str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt2))
-        # FILTER USER
-        if filter_user not in ['', "", None, False]:
-            doman.append(('|'))
-            doman.append(('sh_user_ids', 'in', [int(filter_user)]))
-            doman.append(('user_id', '=', int(filter_user)))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('user_id', '!=', self.env.user.id))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-                doman.append(('user_id', '=', self.env.user.id))
-        if filter_supervisor not in ['', "", None, False]:
-            doman.append(('supervisor_id', '=', int(filter_supervisor)))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-                doman.append(('user_id', '=', self.env.user.id))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('supervisor_id', '!=', self.env.user.id))
-                doman.append(('supervisor_id', '=', False))
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
+#         '''
 
-        from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
+#         self.env.cr.execute(query, where_params_all_activities)    
+#         result_all = self._cr.fetchall()
 
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
-        '''
+#         all_activities_ids = [r[0] for r in result_all]
+#         activities = self.env['mail.activity'].browse(all_activities_ids)
 
-        self.env.cr.execute(query, where_params_all_activities)    
-        result_all = self._cr.fetchall()
+#         # return {}
 
-        all_activities_ids = [r[0] for r in result_all]
-        activities = self.env['mail.activity'].browse(all_activities_ids)
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        # return {}
+#         total_pages = 0.0
+#         total_activities = len(all_activities_ids)
+#         record_limit = self.env.company.sh_planned_table
+#         if total_activities > 0 and record_limit > 0:
+#             total_pages = math.ceil(
+#                 float(total_activities) / float(record_limit))
+#         current_page = int(current_page)
+#         start = self.env.company.sh_all_table * (current_page-1)
+#         stop = current_page * self.env.company.sh_all_table
+#         activities = activities[start:stop]
+#         return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_all_tbl', {
+#             'activities': activities,
+#             'all_acitvities_count': total_activities,
+#             'total_pages': total_pages,
+#             'current_page': current_page,
+#         })
 
-        # -------------------------------------
-        # PLANNED ACTIVITES
-        # -------------------------------------
-
-        total_pages = 0.0
-        total_planned_activities = len(all_activities_ids)
-        record_limit = self.env.company.sh_planned_table
-        if total_planned_activities > 0 and record_limit > 0:
-            total_pages = math.ceil(
-                float(total_planned_activities) / float(record_limit))
-        current_page = int(current_page)
-        start = self.env.company.sh_planned_table * (current_page-1)
-        stop = current_page * self.env.company.sh_planned_table
-        activities = activities[start:stop]
-        return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_todo_tbl', {
-            'activities': activities,
-            'planned_acitvities_count': total_planned_activities,
-            'total_pages': total_pages,
-            'current_page': current_page,
-        })
-
-    @api.model
-    def get_sh_crm_activity_all_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
-        uid = request.session.uid
-        user = request.env['res.users'].sudo().browse(uid)
-        cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
-        cids = [int(cid) for cid in cids.split(',')]
-        doman = [('company_id', 'in', cids)]
-        crm_days_filter = filter_date
-        custom_date_start = start_date
-        custom_date_end = end_date
-        if crm_days_filter == 'today':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'yesterday':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt1.append(prev_day)
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt2.append(prev_day)
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'weekly':  # current week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_week':  # Previous week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'monthly':  # Current Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_month':  # Previous Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'cur_year':  # Current Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_year':  # Previous Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'custom':
-            if custom_date_start and custom_date_end:
-                dt_flt1 = []
-                dt_flt1.append('date_deadline')
-                dt_flt1.append('>')
-                dt_flt1.append(datetime.strptime(
-                    str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt1))
-                dt_flt2 = []
-                dt_flt2.append('date_deadline')
-                dt_flt2.append('<=')
-                dt_flt2.append(datetime.strptime(
-                    str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt2))
-        # FILTER USER
-        if filter_user not in ['', "", None, False]:
-            doman.append(('|'))
-            doman.append(('sh_user_ids', 'in', [int(filter_user)]))
-            doman.append(('user_id', '=', int(filter_user)))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('user_id', '!=', self.env.user.id))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-        if filter_supervisor not in ['', "", None, False]:
-            doman.append(('supervisor_id', '=', int(filter_supervisor)))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-                doman.append(('user_id', '=', self.env.user.id))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('supervisor_id', '!=', self.env.user.id))
-                doman.append(('supervisor_id', '=', False))
-        doman.append(('|'))
-        doman.append(('active', '=', True))
-        doman.append(('active', '=', False))
+#     @api.model
+#     def get_sh_crm_activity_completed_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
+#         uid = request.session.uid
+#         user = request.env['res.users'].sudo().browse(uid)
+#         cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
+#         cids = [int(cid) for cid in cids.split(',')]
+#         doman = [('company_id', 'in', cids),
+#                  ('active', '=', False), ('state', '=', 'done')]
+#         crm_days_filter = filter_date
+#         custom_date_start = start_date
+#         custom_date_end = end_date
+#         if crm_days_filter == 'today':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'yesterday':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt1.append(prev_day)
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt2.append(prev_day)
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'weekly':  # current week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_week':  # Previous week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'monthly':  # Current Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_month':  # Previous Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'cur_year':  # Current Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_year':  # Previous Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'custom':
+#             if custom_date_start and custom_date_end:
+#                 dt_flt1 = []
+#                 dt_flt1.append('date_deadline')
+#                 dt_flt1.append('>')
+#                 dt_flt1.append(datetime.strptime(
+#                     str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt1))
+#                 dt_flt2 = []
+#                 dt_flt2.append('date_deadline')
+#                 dt_flt2.append('<=')
+#                 dt_flt2.append(datetime.strptime(
+#                     str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt2))
+#         # FILTER USER
+#         if filter_user not in ['', "", None, False]:
+#             doman.append(('|'))
+#             doman.append(('user_id', '=', int(filter_user)))
+#             doman.append(('sh_user_ids', 'in', [int(filter_user)]))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '!=', self.env.user.id))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#         if filter_supervisor not in ['', "", None, False]:
+#             doman.append(('supervisor_id', '=', int(filter_supervisor)))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('supervisor_id', '!=', self.env.user.id))
+#                 doman.append(('supervisor_id', '=', False))
         
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
+#         from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
 
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
-        '''
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
+#         '''
 
-        self.env.cr.execute(query, where_params_all_activities)    
-        result_all = self._cr.fetchall()
+#         self.env.cr.execute(query, where_params_all_activities)    
+#         result_all = self._cr.fetchall()
 
-        all_activities_ids = [r[0] for r in result_all]
-        activities = self.env['mail.activity'].browse(all_activities_ids)
+#         all_activities_ids = [r[0] for r in result_all]
+#         activities = self.env['mail.activity'].browse(all_activities_ids)
 
-        # return {}
+#         # return {}
 
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        total_pages = 0.0
-        total_activities = len(all_activities_ids)
-        record_limit = self.env.company.sh_planned_table
-        if total_activities > 0 and record_limit > 0:
-            total_pages = math.ceil(
-                float(total_activities) / float(record_limit))
-        current_page = int(current_page)
-        start = self.env.company.sh_all_table * (current_page-1)
-        stop = current_page * self.env.company.sh_all_table
-        activities = activities[start:stop]
-        return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_all_tbl', {
-            'activities': activities,
-            'all_acitvities_count': total_activities,
-            'total_pages': total_pages,
-            'current_page': current_page,
-        })
+#         total_pages = 0.0
+#         total_completed_activities = len(all_activities_ids)
+#         record_limit = self.env.company.sh_planned_table
+#         if total_completed_activities > 0 and record_limit > 0:
+#             total_pages = math.ceil(
+#                 float(total_completed_activities) / float(record_limit))
+#         current_page = int(current_page)
+#         start = self.env.company.sh_completed_table * (current_page-1)
+#         stop = current_page * self.env.company.sh_completed_table
+#         activities = activities[start:stop]
+#         return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_completed_tbl', {
+#             'activities': activities,
+#             'completed_acitvities_count': total_completed_activities,
+#             'total_pages': total_pages,
+#             'current_page': current_page,
+#         })
 
-    @api.model
-    def get_sh_crm_activity_completed_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
-        uid = request.session.uid
-        user = request.env['res.users'].sudo().browse(uid)
-        cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
-        cids = [int(cid) for cid in cids.split(',')]
-        doman = [('company_id', 'in', cids),
-                 ('active', '=', False), ('state', '=', 'done')]
-        crm_days_filter = filter_date
-        custom_date_start = start_date
-        custom_date_end = end_date
-        if crm_days_filter == 'today':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'yesterday':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt1.append(prev_day)
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt2.append(prev_day)
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'weekly':  # current week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_week':  # Previous week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'monthly':  # Current Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_month':  # Previous Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'cur_year':  # Current Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_year':  # Previous Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'custom':
-            if custom_date_start and custom_date_end:
-                dt_flt1 = []
-                dt_flt1.append('date_deadline')
-                dt_flt1.append('>')
-                dt_flt1.append(datetime.strptime(
-                    str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt1))
-                dt_flt2 = []
-                dt_flt2.append('date_deadline')
-                dt_flt2.append('<=')
-                dt_flt2.append(datetime.strptime(
-                    str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt2))
-        # FILTER USER
-        if filter_user not in ['', "", None, False]:
-            doman.append(('|'))
-            doman.append(('user_id', '=', int(filter_user)))
-            doman.append(('sh_user_ids', 'in', [int(filter_user)]))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('user_id', '!=', self.env.user.id))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-        if filter_supervisor not in ['', "", None, False]:
-            doman.append(('supervisor_id', '=', int(filter_supervisor)))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-                doman.append(('user_id', '=', self.env.user.id))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('supervisor_id', '!=', self.env.user.id))
-                doman.append(('supervisor_id', '=', False))
+#     @api.model
+#     def get_sh_crm_activity_overdue_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
+#         uid = request.session.uid
+#         user = request.env['res.users'].sudo().browse(uid)
+#         cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
+#         cids = [int(cid) for cid in cids.split(',')]
+#         doman = [('company_id', 'in', cids), ('active', '=', True),
+#                  ('date_deadline', '<', fields.Date.today())]
+#         crm_days_filter = filter_date
+#         custom_date_start = start_date
+#         custom_date_end = end_date
+#         if crm_days_filter == 'today':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'yesterday':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt1.append(prev_day)
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt2.append(prev_day)
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'weekly':  # current week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_week':  # Previous week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'monthly':  # Current Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_month':  # Previous Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'cur_year':  # Current Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_year':  # Previous Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'custom':
+#             if custom_date_start and custom_date_end:
+#                 dt_flt1 = []
+#                 dt_flt1.append('date_deadline')
+#                 dt_flt1.append('>')
+#                 dt_flt1.append(datetime.strptime(
+#                     str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt1))
+#                 dt_flt2 = []
+#                 dt_flt2.append('date_deadline')
+#                 dt_flt2.append('<=')
+#                 dt_flt2.append(datetime.strptime(
+#                     str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt2))
+#         # FILTER USER
+#         if filter_user not in ['', "", None, False]:
+#             doman.append(('|'))
+#             doman.append(('user_id', '=', int(filter_user)))
+#             doman.append(('sh_user_ids', 'in', [int(filter_user)]))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '!=', self.env.user.id))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#         if filter_supervisor not in ['', "", None, False]:
+#             doman.append(('supervisor_id', '=', int(filter_supervisor)))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('supervisor_id', '!=', self.env.user.id))
+#                 doman.append(('supervisor_id', '=', False))
         
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
+#         from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
 
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
-        '''
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
+#         '''
 
-        self.env.cr.execute(query, where_params_all_activities)    
-        result_all = self._cr.fetchall()
+#         self.env.cr.execute(query, where_params_all_activities)    
+#         result_all = self._cr.fetchall()
 
-        all_activities_ids = [r[0] for r in result_all]
-        activities = self.env['mail.activity'].browse(all_activities_ids)
+#         all_activities_ids = ([r[0] for r in result_all])
+#         activities = self.env['mail.activity'].browse(all_activities_ids)
 
-        # return {}
+#         # return {}
 
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        total_pages = 0.0
-        total_completed_activities = len(all_activities_ids)
-        record_limit = self.env.company.sh_planned_table
-        if total_completed_activities > 0 and record_limit > 0:
-            total_pages = math.ceil(
-                float(total_completed_activities) / float(record_limit))
-        current_page = int(current_page)
-        start = self.env.company.sh_completed_table * (current_page-1)
-        stop = current_page * self.env.company.sh_completed_table
-        activities = activities[start:stop]
-        return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_completed_tbl', {
-            'activities': activities,
-            'completed_acitvities_count': total_completed_activities,
-            'total_pages': total_pages,
-            'current_page': current_page,
-        })
+#         total_pages = 0.0
+#         total_overdue_activities = len(all_activities_ids)
+#         record_limit = self.env.company.sh_planned_table
+#         if total_overdue_activities > 0 and record_limit > 0:
+#             total_pages = math.ceil(
+#                 float(total_overdue_activities) / float(record_limit))
+#         current_page = int(current_page)
+#         start = self.env.company.sh_due_table * (current_page-1)
+#         stop = current_page * self.env.company.sh_due_table
+#         activities = activities[start:stop]
+#         return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_overdue_tbl', {
+#             'activities': activities,
+#             'overdue_acitvities_count': total_overdue_activities,
+#             'total_pages': total_pages,
+#             'current_page': current_page,
+#         })
 
-    @api.model
-    def get_sh_crm_activity_overdue_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
-        uid = request.session.uid
-        user = request.env['res.users'].sudo().browse(uid)
-        cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
-        cids = [int(cid) for cid in cids.split(',')]
-        doman = [('company_id', 'in', cids), ('active', '=', True),
-                 ('date_deadline', '<', fields.Date.today())]
-        crm_days_filter = filter_date
-        custom_date_start = start_date
-        custom_date_end = end_date
-        if crm_days_filter == 'today':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'yesterday':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt1.append(prev_day)
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt2.append(prev_day)
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'weekly':  # current week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_week':  # Previous week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'monthly':  # Current Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_month':  # Previous Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'cur_year':  # Current Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_year':  # Previous Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'custom':
-            if custom_date_start and custom_date_end:
-                dt_flt1 = []
-                dt_flt1.append('date_deadline')
-                dt_flt1.append('>')
-                dt_flt1.append(datetime.strptime(
-                    str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt1))
-                dt_flt2 = []
-                dt_flt2.append('date_deadline')
-                dt_flt2.append('<=')
-                dt_flt2.append(datetime.strptime(
-                    str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt2))
-        # FILTER USER
-        if filter_user not in ['', "", None, False]:
-            doman.append(('|'))
-            doman.append(('user_id', '=', int(filter_user)))
-            doman.append(('sh_user_ids', 'in', [int(filter_user)]))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('user_id', '!=', self.env.user.id))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-        if filter_supervisor not in ['', "", None, False]:
-            doman.append(('supervisor_id', '=', int(filter_supervisor)))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-                doman.append(('user_id', '=', self.env.user.id))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('supervisor_id', '!=', self.env.user.id))
-                doman.append(('supervisor_id', '=', False))
+#     @api.model
+#     def get_sh_crm_activity_cancelled_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
+#         uid = request.session.uid
+#         user = request.env['res.users'].sudo().browse(uid)
+#         cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
+#         cids = [int(cid) for cid in cids.split(',')]
+#         doman = [('company_id', 'in', cids), ('active',
+#                                               '=', False), ('state', '=', 'cancel')]
+#         crm_days_filter = filter_date
+#         custom_date_start = start_date
+#         custom_date_end = end_date
+#         if crm_days_filter == 'today':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'yesterday':
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt1.append(prev_day)
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             prev_day = (datetime.now().date() -
+#                         relativedelta(days=1)).strftime('%Y/%m/%d')
+#             dt_flt2.append(prev_day)
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'weekly':  # current week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_week':  # Previous week
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(
+#                 (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'monthly':  # Current Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_month':  # Previous Month
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'cur_year':  # Current Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<=')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'prev_year':  # Previous Year
+#             dt_flt1 = []
+#             dt_flt1.append('date_deadline')
+#             dt_flt1.append('>')
+#             dt_flt1.append(
+#                 (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt1))
+#             dt_flt2 = []
+#             dt_flt2.append('date_deadline')
+#             dt_flt2.append('<')
+#             dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
+#             doman.append(tuple(dt_flt2))
+#         elif crm_days_filter == 'custom':
+#             if custom_date_start and custom_date_end:
+#                 dt_flt1 = []
+#                 dt_flt1.append('date_deadline')
+#                 dt_flt1.append('>')
+#                 dt_flt1.append(datetime.strptime(
+#                     str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt1))
+#                 dt_flt2 = []
+#                 dt_flt2.append('date_deadline')
+#                 dt_flt2.append('<=')
+#                 dt_flt2.append(datetime.strptime(
+#                     str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
+#                 doman.append(tuple(dt_flt2))
+#         # FILTER USER
+#         if filter_user not in ['', "", None, False]:
+#             doman.append(('|'))
+#             doman.append(('user_id', '=', int(filter_user)))
+#             doman.append(('sh_user_ids', 'in', [int(filter_user)]))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '!=', self.env.user.id))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#         if filter_supervisor not in ['', "", None, False]:
+#             doman.append(('supervisor_id', '=', int(filter_supervisor)))
+#         else:
+#             if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('sh_user_ids', 'in', [self.env.user.id]))
+#                 doman.append(('user_id', '=', self.env.user.id))
+#             elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
+#                 doman.append(('|'))
+#                 doman.append(('|'))
+#                 doman.append(('supervisor_id', '=', self.env.user.id))
+#                 doman.append(('supervisor_id', '!=', self.env.user.id))
+#                 doman.append(('supervisor_id', '=', False))
         
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
+#         from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
 
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
-        '''
+#         query = f'''
+#             SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
+#         '''
 
-        self.env.cr.execute(query, where_params_all_activities)    
-        result_all = self._cr.fetchall()
+#         self.env.cr.execute(query, where_params_all_activities)    
+#         result_all = self._cr.fetchall()
 
-        all_activities_ids = ([r[0] for r in result_all])
-        activities = self.env['mail.activity'].browse(all_activities_ids)
+#         all_activities_ids = [r[0] for r in result_all]
+#         activities = self.env['mail.activity'].browse(all_activities_ids)
 
-        # return {}
+#         # return {}
 
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
+#         # -------------------------------------
+#         # ALL ACTIVITES
+#         # -------------------------------------
 
-        total_pages = 0.0
-        total_overdue_activities = len(all_activities_ids)
-        record_limit = self.env.company.sh_planned_table
-        if total_overdue_activities > 0 and record_limit > 0:
-            total_pages = math.ceil(
-                float(total_overdue_activities) / float(record_limit))
-        current_page = int(current_page)
-        start = self.env.company.sh_due_table * (current_page-1)
-        stop = current_page * self.env.company.sh_due_table
-        activities = activities[start:stop]
-        return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_overdue_tbl', {
-            'activities': activities,
-            'overdue_acitvities_count': total_overdue_activities,
-            'total_pages': total_pages,
-            'current_page': current_page,
-        })
-
-    @api.model
-    def get_sh_crm_activity_cancelled_tbl(self, filter_date, filter_user, start_date, end_date, filter_supervisor, current_page):
-        uid = request.session.uid
-        user = request.env['res.users'].sudo().browse(uid)
-        cids = request.httprequest.cookies.get('cids', str(user.company_id.id))
-        cids = [int(cid) for cid in cids.split(',')]
-        doman = [('company_id', 'in', cids), ('active',
-                                              '=', False), ('state', '=', 'cancel')]
-        crm_days_filter = filter_date
-        custom_date_start = start_date
-        custom_date_end = end_date
-        if crm_days_filter == 'today':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            dt_flt1.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'yesterday':
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt1.append(prev_day)
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            prev_day = (datetime.now().date() -
-                        relativedelta(days=1)).strftime('%Y/%m/%d')
-            dt_flt2.append(prev_day)
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'weekly':  # current week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_week':  # Previous week
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(weeks=2, weekday=0)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(
-                (datetime.now().date() - relativedelta(weeks=1, weekday=6)).strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'monthly':  # Current Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_month':  # Previous Month
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(months=1)).strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'cur_year':  # Current Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append((datetime.now().date()).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<=')
-            dt_flt2.append(datetime.now().date().strftime("%Y/%m/%d"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'prev_year':  # Previous Year
-            dt_flt1 = []
-            dt_flt1.append('date_deadline')
-            dt_flt1.append('>')
-            dt_flt1.append(
-                (datetime.now().date() - relativedelta(years=1)).strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt1))
-            dt_flt2 = []
-            dt_flt2.append('date_deadline')
-            dt_flt2.append('<')
-            dt_flt2.append(datetime.now().date().strftime("%Y/01/01"))
-            doman.append(tuple(dt_flt2))
-        elif crm_days_filter == 'custom':
-            if custom_date_start and custom_date_end:
-                dt_flt1 = []
-                dt_flt1.append('date_deadline')
-                dt_flt1.append('>')
-                dt_flt1.append(datetime.strptime(
-                    str(custom_date_start), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt1))
-                dt_flt2 = []
-                dt_flt2.append('date_deadline')
-                dt_flt2.append('<=')
-                dt_flt2.append(datetime.strptime(
-                    str(custom_date_end), DEFAULT_SERVER_DATE_FORMAT).strftime("%Y/%m/%d"))
-                doman.append(tuple(dt_flt2))
-        # FILTER USER
-        if filter_user not in ['', "", None, False]:
-            doman.append(('|'))
-            doman.append(('user_id', '=', int(filter_user)))
-            doman.append(('sh_user_ids', 'in', [int(filter_user)]))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('user_id', '!=', self.env.user.id))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('user_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-        if filter_supervisor not in ['', "", None, False]:
-            doman.append(('supervisor_id', '=', int(filter_supervisor)))
-        else:
-            if self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('sh_user_ids', 'in', [self.env.user.id]))
-                doman.append(('user_id', '=', self.env.user.id))
-            elif not self.env.user.has_group('sh_activities_management_basic.group_activity_supervisor') and self.env.user.has_group('sh_activities_management_basic.group_activity_user') and not self.env.user.has_group('sh_activities_management_basic.group_activity_manager'):
-                doman.append(('|'))
-                doman.append(('|'))
-                doman.append(('supervisor_id', '=', self.env.user.id))
-                doman.append(('supervisor_id', '!=', self.env.user.id))
-                doman.append(('supervisor_id', '=', False))
-        
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
-
-        from_clause, where_clause_all_activities, where_params_all_activities = self.env['mail.activity']._where_calc(doman).get_sql()
-
-        query = f'''
-            SELECT "mail_activity".id FROM "mail_activity" WHERE {where_clause_all_activities}
-        '''
-
-        self.env.cr.execute(query, where_params_all_activities)    
-        result_all = self._cr.fetchall()
-
-        all_activities_ids = [r[0] for r in result_all]
-        activities = self.env['mail.activity'].browse(all_activities_ids)
-
-        # return {}
-
-        # -------------------------------------
-        # ALL ACTIVITES
-        # -------------------------------------
-
-        total_pages = 0.0
-        total_cancelled_activities = len(all_activities_ids)
-        record_limit = self.env.company.sh_cancel_table
-        if total_cancelled_activities > 0 and record_limit > 0:
-            total_pages = math.ceil(
-                float(total_cancelled_activities) / float(record_limit))
-        current_page = int(current_page)
-        start = self.env.company.sh_cancel_table * (current_page-1)
-        stop = current_page * self.env.company.sh_cancel_table
-        activities = activities[start:stop]
-        return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_cancelled_tbl', {
-            'activities': activities,
-            'cancelled_acitvities_count': total_cancelled_activities,
-            'total_pages': total_pages,
-            'current_page': current_page,
-        })
+#         total_pages = 0.0
+#         total_cancelled_activities = len(all_activities_ids)
+#         record_limit = self.env.company.sh_cancel_table
+#         if total_cancelled_activities > 0 and record_limit > 0:
+#             total_pages = math.ceil(
+#                 float(total_cancelled_activities) / float(record_limit))
+#         current_page = int(current_page)
+#         start = self.env.company.sh_cancel_table * (current_page-1)
+#         stop = current_page * self.env.company.sh_cancel_table
+#         activities = activities[start:stop]
+#         return self.env['ir.ui.view'].with_context()._render_template('sh_activities_management_basic.sh_crm_db_activity_cancelled_tbl', {
+#             'activities': activities,
+#             'cancelled_acitvities_count': total_cancelled_activities,
+#             'total_pages': total_pages,
+#             'current_page': current_page,
+#         })
 
     @api.model
     def get_user_list(self):
