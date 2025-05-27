@@ -136,8 +136,8 @@ class MailActivity(models.Model):
                 record.state = 'cancel'
             if record.activity_done:
                 record.state = 'done'
-        for activity_record in self.filtered(lambda activity: activity.active):
-            activity_record.sh_state = activity_record.state
+        # for activity_record in self.filtered(lambda activity: activity.active):
+        #     activity_record.sh_state = activity_record.state
         return result
 
     @api.model_create_multi

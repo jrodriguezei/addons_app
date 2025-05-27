@@ -35,3 +35,8 @@ Initial Release
 17.0.9 (Date: 21st April 2025)
 ---------------------------------
 [FIX] issue of getting error on opening the dashboard.
+
+17.0.10 (Date: 24th May 2025)
+---------------------------------
+[FIX] issue of getting error on opening the dashboard.
+
